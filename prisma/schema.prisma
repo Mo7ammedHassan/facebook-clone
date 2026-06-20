@@ -12,3 +12,204 @@ datasource db {
   provider = "sqlserver"
 }
 
+model User {
+  id                    Int              @id @default(autoincrement())
+  publicId              String           @unique // random string
+  name                  String           @unique
+  email                 String           @unique
+  password              String
+  isPrivate             Boolean          @default(false)
+  isEmailVerified       Boolean          @default(false)
+  createdAt             DateTime         @default(now())
+  posts                 Post[]
+  imageId               Int?             @unique
+  image                 image?           @relation(fields: [imageId], references: [id])
+  groups                membersOfGroup[]
+  updatedAt             DateTime         @updatedAt
+  profileId             Int              @unique
+  profile               Profile?
+  reacts                React[]
+  comments              Comment[]
+  friends               Friends[]        @relation("UserFriends") // الي انا ضفتهم 
+  friendedBy            Friends[]        @relation("UserFriendsOf") // الي بعتولي
+  savedPosts            savedPosts[]
+  sessions              loginSession[]
+  groupsRequests        GroupRequests[]
+  notificationsReceived Notifications[]  @relation("NotificationRecipient") // الإشعارات اللي جاتلي
+  notificationsSent     Notifications[]  @relation("NotificationActor") // الإشعارات اللي أنا سببتها للناس
+}
+
+model Profile {
+  id          Int      @id @default(autoincrement())
+  bio         String?
+  gender      String?
+  dateOfBirth DateTime
+  city        String?
+  country     String?
+  school      String?
+  education   String?
+  work        String?
+  userId      Int      @unique
+  user        User     @relation(fields: [userId], references: [id])
+  updatedAt   DateTime @updatedAt
+}
+
+model image {
+  id             Int       @id @default(autoincrement())
+  publicId       String     @unique // random string
+  fileName       String 
+  filePath       String
+  orderIndex     Int       @default(1)
+  description    String?
+  createdAt      DateTime  @default(now())
+  user           User?     @relation
+  coverGroup     Group?
+  post           PostImage[]
+  imageInComment Comment[]
+}
+
+model Post {
+  id           Int       @id @default(autoincrement())
+  content      String
+  groupId      Int?
+  group        Group?    @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  loveCount    Int       @default(0)
+  hahaCount    Int       @default(0)
+  eggCount     Int       @default(0)
+  wowCount     Int       @default(0)
+  sadCount     Int       @default(0)
+  angryCount   Int       @default(0)
+  commentCount Int       @default(0)
+  shareCount   Int       @default(0)
+  author       User      @relation(fields: [userId], references: [id])
+  userId       Int
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  isPrivate    Boolean   @default(false)
+  DeletedAt    DateTime?
+  type         String    @default("Normal") // Normal, Share
+
+  // share Post
+  parentPostId  Int?
+  parentPost    Post?        @relation("RePostRelation", fields: [parentPostId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rePosts       Post[]       @relation("RePostRelation")
+  images        PostImage[]
+  commentOnPost String? // put comment on post your opinion about post when share it
+  reacts        React[]
+  comments      Comment[]
+  savedPosts    savedPosts[]
+}
+
+model Group {
+  id          Int              @id @default(autoincrement())
+  name        String
+  description String?
+  rules       String?
+  coverId     Int?             @unique
+  cover       image?           @relation(fields: [coverId], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  posts       Post[]
+  members     membersOfGroup[]
+  requests    GroupRequests[]
+}
+
+model membersOfGroup {
+  id       Int      @id @default(autoincrement())
+  groupId  Int
+  group    Group    @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userId   Int
+  user     User     @relation(fields: [userId], references: [id])
+  role     String   @default("member")
+  joinedAt DateTime @default(now())
+
+  @@unique([groupId, userId])
+}
+
+model React {
+  id        Int    @id @default(autoincrement())
+  postId    Int
+  post      Post   @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  userId    Int
+  user      User   @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reactType String
+
+  @@unique([postId, userId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  content   String
+  imageId   Int?
+  image     image?   @relation(fields: [imageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Friends {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation("UserFriends", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  friendId  Int
+  friend    User     @relation("UserFriendsOf", fields: [friendId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model savedPosts {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdAt DateTime @default(now())
+}
+
+model loginSession {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  token        String
+  refreshToken String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model GroupRequests {
+  id         Int      @id @default(autoincrement())
+  groupId    Int
+  group      Group    @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  targetType String // Join Request, Post Request
+  targetId   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Notifications {
+  id          Int      @id @default(autoincrement())
+  recipientId Int
+  recipient   User     @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  actorId     Int
+  actor       User     @relation("NotificationActor", fields: [actorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  actionType  String // LIKE, COMMENT, FRIEND_REQUEST, GROUP_ACCEPT,.....
+  entityType  String // POST, COMMENT, USER, GROUP
+  entityId    Int // الـ ID بتاع البوست أو الكومنت أو الجروب
+  content     String? // اختياري: لو حابب تخزن نص جاهز
+  isRead      Boolean  @default(false) // مهمة جداً للإشعارات!
+  createdAt   DateTime @default(now())
+}
+
+model PostImage {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  imageId   Int
+  image     image    @relation(fields: [imageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
