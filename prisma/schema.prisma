@@ -18,6 +18,8 @@ model User {
   name                  String           @unique
   email                 String           @unique
   password              String
+  isBlocked             Boolean          @default(false)
+  role                  String           @default("user")
   isPrivate             Boolean          @default(false)
   isEmailVerified       Boolean          @default(false)
   createdAt             DateTime         @default(now())
