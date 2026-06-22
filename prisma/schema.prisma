@@ -14,7 +14,7 @@ datasource db {
 
 model User {
   id                    Int              @id @default(autoincrement())
-  publicId              String           @unique // random string
+  publicId              String?           @unique // random string
   name                  String           @unique
   email                 String           @unique
   password              String
@@ -25,20 +25,22 @@ model User {
   createdAt             DateTime         @default(now())
   posts                 Post[]
   imageId               Int?             @unique
-  image                 image?           @relation(fields: [imageId], references: [id])
-  groups                membersOfGroup[]
+  image                 Image?           @relation(fields: [imageId], references: [id])
+  groups                MembersOfGroup[]
   updatedAt             DateTime         @updatedAt
-  profileId             Int              @unique
+  profileId             Int?              @unique
   profile               Profile?
   reacts                React[]
   comments              Comment[]
   friends               Friends[]        @relation("UserFriends") // الي انا ضفتهم 
   friendedBy            Friends[]        @relation("UserFriendsOf") // الي بعتولي
-  savedPosts            savedPosts[]
-  sessions              loginSession[]
+  savedPosts            SavedPosts[]
+  sessions              LoginSession[]
   groupsRequests        GroupRequests[]
   notificationsReceived Notifications[]  @relation("NotificationRecipient") // الإشعارات اللي جاتلي
   notificationsSent     Notifications[]  @relation("NotificationActor") // الإشعارات اللي أنا سببتها للناس
+  deletedAt             DateTime?
+  verificationCode     VerificationCode[]
 }
 
 model Profile {
@@ -56,7 +58,7 @@ model Profile {
   updatedAt   DateTime @updatedAt
 }
 
-model image {
+model Image {
   id             Int       @id @default(autoincrement())
   publicId       String     @unique // random string
   fileName       String 
@@ -99,7 +101,7 @@ model Post {
   commentOnPost String? // put comment on post your opinion about post when share it
   reacts        React[]
   comments      Comment[]
-  savedPosts    savedPosts[]
+  savedPosts    SavedPosts[]
 }
 
 model Group {
@@ -108,15 +110,15 @@ model Group {
   description String?
   rules       String?
   coverId     Int?             @unique
-  cover       image?           @relation(fields: [coverId], references: [id])
+  cover       Image?           @relation(fields: [coverId], references: [id])
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   posts       Post[]
-  members     membersOfGroup[]
+  members     MembersOfGroup[]
   requests    GroupRequests[]
 }
 
-model membersOfGroup {
+model MembersOfGroup {
   id       Int      @id @default(autoincrement())
   groupId  Int
   group    Group    @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -147,7 +149,7 @@ model Comment {
   user      User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   content   String
   imageId   Int?
-  image     image?   @relation(fields: [imageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  image     Image?   @relation(fields: [imageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -163,7 +165,7 @@ model Friends {
   updatedAt DateTime @updatedAt
 }
 
-model savedPosts {
+model SavedPosts {
   id        Int      @id @default(autoincrement())
   postId    Int
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -172,7 +174,7 @@ model savedPosts {
   createdAt DateTime @default(now())
 }
 
-model loginSession {
+model LoginSession {
   id           Int      @id @default(autoincrement())
   userId       Int
   user         User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -213,5 +215,17 @@ model PostImage {
   postId    Int
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   imageId   Int
-  image     image    @relation(fields: [imageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  image     Image    @relation(fields: [imageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model VerificationCode {
+  id        Int      @id @default(autoincrement())
+  code      String   // الكود نفسه (ممكن يكون 6 أرقام أو Hash)
+  type      String   // النوع: مثلاً 'EMAIL_VERIFICATION' أو 'PASSWORD_RESET'
+  expiresAt DateTime // وقت انتهاء صلاحية الكود
+  createdAt DateTime @default(now())
+  
+  // ربط الكود باليوزر
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

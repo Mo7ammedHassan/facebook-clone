@@ -2,6 +2,8 @@
 // npm install --save-dev prisma dotenv
 import * as dotenv from "dotenv";
 import { defineConfig } from "prisma/config";
+import { PrismaMssql } from "@prisma/adapter-mssql";
+import { PrismaClient } from "./generated/prisma/client";
 dotenv.config();
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -12,3 +14,16 @@ export default defineConfig({
     url: process.env["DATABASE_URL"],
   },
 });
+
+const config = {
+  server: "localhost",
+  port: 1433,
+  database: "mydb",
+  integratedSecurity:true,
+  options: {
+    encrypt: true,
+    trustServerCertificate: true, // For self-signed certificates
+  },
+};
+const adapter = new PrismaMssql(config);
+export const prisma = new PrismaClient({ adapter });
