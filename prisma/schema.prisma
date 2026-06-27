@@ -1,3 +1,255 @@
+// // This is your Prisma schema file,
+// // learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// generator client {
+//   provider = "prisma-client"
+//   output   = "../generated/prisma"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+// }
+
+// model User {
+//   id              Int       @id @default(autoincrement())
+//   publicId        String?   @unique // random string
+//   name            String    @unique
+//   email           String    @unique
+//   password        String
+//   isBlocked       Boolean   @default(false)
+//   role            String    @default("user")
+//   isPrivate       Boolean   @default(false)
+//   isEmailVerified Boolean   @default(false)
+//   createdAt       DateTime  @default(now())
+//   updatedAt       DateTime  @updatedAt
+//   deletedAt       DateTime?
+
+//   // العلاقات
+//   posts                 Post[]
+//   imageId               Int?               @unique
+//   image                 Image?             @relation(fields: [imageId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+//   groups                MembersOfGroup[]
+//   profile               Profile? // علاقة ون تو ون صحيحة (المفتاح الأجنبي في الـ Profile)
+//   reacts                React[]
+//   comments              Comment[]
+//   friends               Friends[]          @relation("UserFriends")
+//   friendedBy            Friends[]          @relation("UserFriendsOf")
+//   savedPosts            SavedPosts[]
+//   sessions              LoginSession[]
+//   groupsRequests        GroupRequests[]
+//   notificationsReceived Notifications[]    @relation("NotificationRecipient")
+//   notificationsSent     Notifications[]    @relation("NotificationActor")
+//   verificationCode      VerificationCode[]
+// }
+
+// model Profile {
+//   id          Int      @id @default(autoincrement())
+//   bio         String?
+//   gender      String?
+//   dateOfBirth DateTime
+//   city        String?
+//   country     String?
+//   school      String?
+//   education   String?
+//   work        String?
+//   updatedAt   DateTime @updatedAt
+
+//   // العلاقة مع اليوزر
+//   userId Int  @unique
+//   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+// }
+
+// model Image {
+//   id          Int      @id @default(autoincrement())
+//   publicId    String   @unique // random string
+//   fileName    String
+//   filePath    String
+//   orderIndex  Int      @default(1)
+//   description String?
+//   createdAt   DateTime @default(now())
+
+//   // العلاقات
+//   user           User?
+//   coverGroup     Group?
+//   post           PostImage[]
+//   imageInComment Comment[]
+// }
+
+// model Post {
+//   id           Int       @id @default(autoincrement())
+//   content      String
+//   loveCount    Int       @default(0)
+//   hahaCount    Int       @default(0)
+//   eggCount     Int       @default(0)
+//   wowCount     Int       @default(0)
+//   sadCount     Int       @default(0)
+//   angryCount   Int       @default(0)
+//   commentCount Int       @default(0)
+//   shareCount   Int       @default(0)
+//   createdAt    DateTime  @default(now())
+//   updatedAt    DateTime  @updatedAt
+//   isPrivate    Boolean   @default(false)
+//   DeletedAt    DateTime?
+//   type         String    @default("Normal") // Normal, Share
+
+//   // العلاقة مع الجروب
+//   groupId Int?
+//   group   Group? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+
+//   // العلاقة مع كاتب البوست
+//   userId Int
+//   author User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+//   // مشاركة البوست (Share Post)
+//   parentPostId  Int?
+//   parentPost    Post?   @relation("RePostRelation", fields: [parentPostId], references: [id], onDelete: SetNull)
+//   rePosts       Post[]  @relation("RePostRelation")
+//   commentOnPost String? // رأيك عند مشاركة البوست
+
+//   // علاقات أخرى
+//   images     PostImage[]
+//   reacts     React[]
+//   comments   Comment[]
+//   savedPosts SavedPosts[]
+// }
+
+// model Group {
+//   id          Int      @id @default(autoincrement())
+//   name        String
+//   description String?
+//   rules       String?
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+
+//   // العلاقات
+//   coverId  Int?             @unique
+//   cover    Image?           @relation(fields: [coverId], references: [id], onDelete: SetNull)
+//   posts    Post[]
+//   members  MembersOfGroup[]
+//   requests GroupRequests[]
+// }
+
+// model MembersOfGroup {
+//   id       Int      @id @default(autoincrement())
+//   role     String   @default("member")
+//   joinedAt DateTime @default(now())
+
+//   groupId Int
+//   group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+//   userId  Int
+//   user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+//   @@unique([groupId, userId])
+// }
+
+// model React {
+//   id        Int    @id @default(autoincrement())
+//   reactType String
+
+//   postId Int
+//   post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+//   userId Int
+//   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+//   @@unique([postId, userId])
+// }
+
+// model Comment {
+//   id        Int      @id @default(autoincrement())
+//   content   String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   postId  Int
+//   post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+//   userId  Int
+//   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   imageId Int?
+//   image   Image? @relation(fields: [imageId], references: [id], onDelete: SetNull)
+// }
+
+// model Friends {
+//   id        Int      @id @default(autoincrement())
+//   status    String   @default("pending")
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   userId   Int
+//   user     User @relation("UserFriends", fields: [userId], references: [id], onDelete: Cascade)
+//   friendId Int
+//   friend   User @relation("UserFriendsOf", fields: [friendId], references: [id], onDelete: Cascade)
+// }
+
+// model SavedPosts {
+//   id        Int      @id @default(autoincrement())
+//   createdAt DateTime @default(now())
+
+//   postId Int
+//   post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+//   userId Int
+//   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+// }
+
+// model LoginSession {
+//   id           Int      @id @default(autoincrement())
+//   token        String
+//   refreshToken String
+//   createdAt    DateTime @default(now())
+//   expiredAt    DateTime
+
+//   userId Int
+//   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+// }
+
+// model GroupRequests {
+//   id         Int      @id @default(autoincrement())
+//   targetType String // Join Request, Post Request
+//   targetId   Int
+//   createdAt  DateTime @default(now())
+//   updatedAt  DateTime @updatedAt
+
+//   groupId Int
+//   group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+//   userId  Int
+//   user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+// }
+
+// model Notifications {
+//   id         Int      @id @default(autoincrement())
+//   actionType String // LIKE, COMMENT, FRIEND_REQUEST, GROUP_ACCEPT,.....
+//   entityType String // POST, COMMENT, USER, GROUP
+//   entityId   Int // الـ ID بتاع البوست أو الكومنت أو الجروب
+//   content    String? // اختياري: لو حابب تخزن نص جاهز
+//   isRead     Boolean  @default(false)
+//   createdAt  DateTime @default(now())
+
+//   recipientId Int
+//   recipient   User @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+//   actorId     Int
+//   actor       User @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+// }
+
+// model PostImage {
+//   id      Int   @id @default(autoincrement())
+//   postId  Int
+//   post    Post  @relation(fields: [postId], references: [id], onDelete: Cascade)
+//   imageId Int
+//   image   Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+// }
+
+// model VerificationCode {
+//   id        Int      @id @default(autoincrement())
+//   code      String
+//   type      String
+//   expiresAt DateTime
+//   createdAt DateTime @default(now())
+
+//   userId Int
+//   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+// }
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -8,32 +260,35 @@ datasource db {
 }
 
 model User {
-  id                    Int              @id @default(autoincrement())
-  publicId              String           @unique
-  name                  String           @unique
-  email                 String           @unique
-  password              String
-  isPrivate             Boolean          @default(false)
-  isEmailVerified       Boolean          @default(false)
-  createdAt             DateTime         @default(now())
-  imageId               Int?             @unique
-  updatedAt             DateTime         @updatedAt
-  isBlocked             Boolean          @default(false)
-  deletedAt             DateTime?
-  role                  String           @default("user")
-  comments              Comment[]
-  friendedBy            Friends[]        @relation("UserFriendsOf")
-  friends               Friends[]        @relation("UserFriends")
-  groupsRequests        GroupRequests[]
-  notificationsSent     Notifications[]  @relation("NotificationActor")
-  notificationsReceived Notifications[]  @relation("NotificationRecipient")
+  id              Int       @id @default(autoincrement())
+  publicId        String?   @unique // random string
+  name            String    @unique
+  email           String    @unique
+  password        String
+  isBlocked       Boolean   @default(false)
+  role            String    @default("user")
+  isPrivate       Boolean   @default(false)
+  isEmailVerified Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  // العلاقات
   posts                 Post[]
-  profile               Profile[]
+  imageId               Int?               @unique
+  image                 Image?             @relation(fields: [imageId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  groups                MembersOfGroup[]
+  profile               Profile? // علاقة ون تو ون صحيحة (المفتاح الأجنبي في الـ Profile)
   reacts                React[]
-  image                 image?           @relation(fields: [imageId], references: [id])
-  loginSession          loginSession[]
-  membersOfGroup        membersOfGroup[]
-  savedPosts            savedPosts[]
+  comments              Comment[]
+  friends               Friends[]          @relation("UserFriends")
+  friendedBy            Friends[]          @relation("UserFriendsOf")
+  savedPosts            SavedPosts[]
+  sessions              LoginSession[]
+  groupsRequests        GroupRequests[]
+  notificationsReceived Notifications[]    @relation("NotificationRecipient")
+  notificationsSent     Notifications[]    @relation("NotificationActor")
+  verificationCode      VerificationCode[]
 }
 
 model Profile {
@@ -46,164 +301,198 @@ model Profile {
   school      String?
   education   String?
   work        String?
-  userId      Int      @unique
   updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id])
+
+  // العلاقة مع اليوزر
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Image {
+  id          Int      @id @default(autoincrement())
+  publicId    String   @unique // random string
+  fileName    String
+  filePath    String
+  orderIndex  Int      @default(1)
+  description String?
+  createdAt   DateTime @default(now())
+
+  // العلاقات
+  user           User?
+  coverGroup     Group?
+  post           PostImage[]
+  imageInComment Comment[]
 }
 
 model Post {
-  id            Int          @id @default(autoincrement())
-  content       String
-  groupId       Int?
-  loveCount     Int          @default(0)
-  hahaCount     Int          @default(0)
-  eggCount      Int          @default(0)
-  wowCount      Int          @default(0)
-  sadCount      Int          @default(0)
-  angryCount    Int          @default(0)
-  commentCount  Int          @default(0)
-  shareCount    Int          @default(0)
-  userId        Int
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  isPrivate     Boolean      @default(false)
-  DeletedAt     DateTime?
-  type          String       @default("Normal")
+  id           Int       @id @default(autoincrement())
+  content      String
+  loveCount    Int       @default(0)
+  hahaCount    Int       @default(0)
+  eggCount     Int       @default(0)
+  wowCount     Int       @default(0)
+  sadCount     Int       @default(0)
+  angryCount   Int       @default(0)
+  commentCount Int       @default(0)
+  shareCount   Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  isPrivate    Boolean   @default(false)
+  DeletedAt    DateTime?
+  type         String    @default("Normal") // Normal, Share
+
+  // العلاقة مع الجروب
+  groupId Int?
+  group   Group? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+
+  // العلاقة مع كاتب البوست
+  userId Int
+  author User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // مشاركة البوست (Share Post)
   parentPostId  Int?
-  commentOnPost String?
-  comments      Comment[]
-  group         Group?       @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  parentPost    Post?        @relation("RePostRelation", fields: [parentPostId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  rePosts       Post[]       @relation("RePostRelation")
-  author        User         @relation(fields: [userId], references: [id])
-  images        PostImage[]
-  reacts        React[]
-  savedPosts    savedPosts[]
+  parentPost    Post?   @relation("RePostRelation", fields: [parentPostId], references: [id], onDelete: SetNull)
+  rePosts       Post[]  @relation("RePostRelation")
+  commentOnPost String? // رأيك عند مشاركة البوست
+
+  // علاقات أخرى
+  images     PostImage[]
+  reacts     React[]
+  comments   Comment[]
+  savedPosts SavedPosts[]
 }
 
 model Group {
-  id             Int              @id @default(autoincrement())
-  name           String
-  description    String?
-  rules          String?
-  coverId        Int?             @unique
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  cover          image?           @relation(fields: [coverId], references: [id])
-  requests       GroupRequests[]
-  posts          Post[]
-  membersOfGroup membersOfGroup[]
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  rules       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // العلاقات
+  coverId  Int?             @unique
+  cover    Image?           @relation(fields: [coverId], references: [id], onDelete: SetNull)
+  posts    Post[]
+  members  MembersOfGroup[]
+  requests GroupRequests[]
+}
+
+model MembersOfGroup {
+  id       Int      @id @default(autoincrement())
+  role     String   @default("member")
+  joinedAt DateTime @default(now())
+
+  groupId Int
+  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId  Int
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
 }
 
 model React {
   id        Int    @id @default(autoincrement())
-  postId    Int
-  userId    Int
   reactType String
-  post      Post   @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user      User   @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  postId Int
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId])
 }
 
 model Comment {
   id        Int      @id @default(autoincrement())
-  postId    Int
-  userId    Int
   content   String
-  imageId   Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  image     image?   @relation(fields: [imageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user      User     @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  postId  Int
+  post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId  Int
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  imageId Int?
+  image   Image? @relation(fields: [imageId], references: [id], onDelete: SetNull)
 }
 
 model Friends {
   id        Int      @id @default(autoincrement())
-  userId    Int
-  friendId  Int
   status    String   @default("pending")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  friend    User     @relation("UserFriendsOf", fields: [friendId], references: [id], onUpdate: NoAction)
-  user      User     @relation("UserFriends", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  userId   Int
+  user     User @relation("UserFriends", fields: [userId], references: [id], onDelete: Cascade)
+  friendId Int
+  friend   User @relation("UserFriendsOf", fields: [friendId], references: [id], onDelete: Cascade)
+}
+
+model SavedPosts {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  postId Int
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LoginSession {
+  id           Int      @id @default(autoincrement())
+  token        String
+  refreshToken String
+  createdAt    DateTime @default(now())
+  expiredAt    DateTime
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model GroupRequests {
   id         Int      @id @default(autoincrement())
-  groupId    Int
-  userId     Int
-  targetType String
+  targetType String // Join Request, Post Request
   targetId   Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  group      Group    @relation(fields: [groupId], references: [id], onUpdate: NoAction)
-  user       User     @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  groupId Int
+  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId  Int
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Notifications {
-  id          Int      @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
+  actionType String // LIKE, COMMENT, FRIEND_REQUEST, GROUP_ACCEPT,.....
+  entityType String // POST, COMMENT, USER, GROUP
+  entityId   Int // الـ ID بتاع البوست أو الكومنت أو الجروب
+  content    String? // اختياري: لو حابب تخزن نص جاهز
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
   recipientId Int
+  recipient   User @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
   actorId     Int
-  actionType  String
-  entityType  String
-  entityId    Int
-  content     String?
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  actor       User     @relation("NotificationActor", fields: [actorId], references: [id], onUpdate: NoAction)
-  recipient   User     @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  actor       User @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
 }
 
 model PostImage {
   id      Int   @id @default(autoincrement())
   postId  Int
+  post    Post  @relation(fields: [postId], references: [id], onDelete: Cascade)
   imageId Int
-  image   image @relation(fields: [imageId], references: [id], onUpdate: NoAction)
-  post    Post  @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  image   Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
 }
 
-model image {
-  id             Int         @id @default(autoincrement())
-  publicId       String      @unique
-  fileName       String
-  filePath       String
-  orderIndex     Int         @default(1)
-  description    String?
-  createdAt      DateTime    @default(now())
-  imageInComment Comment[]
-  coverGroup     Group?
-  post           PostImage[]
-  user           User?
-}
-
-model loginSession {
-  id           Int      @id @default(autoincrement())
-  userId       Int
-  refreshToken String   @unique
-  createdAt    DateTime @default(now())
-  expireAt     DateTime
-  User         User     @relation(fields: [userId], references: [id], onUpdate: NoAction)
-}
-
-model membersOfGroup {
-  id       Int      @id @default(autoincrement())
-  groupId  Int
-  userId   Int
-  role     String   @default("member")
-  joinedAt DateTime @default(now())
-  Group    Group    @relation(fields: [groupId], references: [id], onUpdate: NoAction)
-  User     User     @relation(fields: [userId], references: [id])
-
-  @@unique([groupId, userId])
-}
-
-model savedPosts {
+model VerificationCode {
   id        Int      @id @default(autoincrement())
-  postId    Int
-  userId    Int
+  code      String
+  type      String
+  expiresAt DateTime
   createdAt DateTime @default(now())
-  Post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  User      User     @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
