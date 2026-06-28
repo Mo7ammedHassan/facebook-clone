@@ -4,7 +4,13 @@
   "description": "create facebook clone",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "npg": "npx prisma generate",
+    "npdp": "npx prisma db push",
+    "ga": "git add",
+    "gc-m": "git commit -m",
+    "gph": "git push",
+    "gpl": "git pull"
   },
   "repository": {
     "type": "git",
@@ -38,7 +44,8 @@
     "tedious": "^19.2.1",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
-    "xss": "^1.0.15"
+    "xss": "^1.0.15",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",

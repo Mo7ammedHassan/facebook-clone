@@ -1,4 +1,4 @@
-import prisma from "../../../config/prisma-client.config";
+import prisma from "../config/prisma-client.config";
 
 class LoginSessionRepository {
   async create(data: {
@@ -15,17 +15,27 @@ class LoginSessionRepository {
     });
   }
 
-  //   async getByUserId(userId: number) {
-  //     return await prisma.loginSession.findMany({
-  //       where: { userId },
-  //     });
-  //   }
+    async findByRefreshToken(refreshToken: string) {
+      return await prisma.loginSession.findUnique({
+        where: { refreshToken },
+      });
+    }
 
   async deleteByToken(refreshToken: string) {
     return await prisma.loginSession.deleteMany({
       where: { refreshToken },
     });
   }
+
+
+async revokeSession(id: number) {
+  return await prisma.loginSession.update({
+    where: { id },
+    data: {revokedAt: new Date()},
+    }
+  );
 }
 
+}
 export default LoginSessionRepository;
+// str[str. - 1]

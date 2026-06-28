@@ -1,13 +1,12 @@
 import bcrypt from "bcrypt";
-import crypto, { createPublicKey } from "crypto";
+import crypto from "crypto";
 import AppError from "../../../utils/app-error";
 import environment from "../../../config/environment";
 import createAuthTokens from "../../../utils/auth-tokens";
-import { ProfileRepository } from "../Repositories/profile.repository";
-import LoginSessionRepository from "../Repositories/login-session.Repo";
-import UserRepository from "../Repositories/user.repo";
-import { createParam } from "@prisma/client/runtime/client";
 import { createPublicId } from "../../../utils/create-public-id";
+import UserRepository from "../../../Repositories/user.repo";
+import LoginSessionRepository from "../../../Repositories/login-session.Repo";
+import ProfileRepository from "../../../Repositories/profile.repository";
 
 const userRepo = new UserRepository();
 const loginSessionRepo = new LoginSessionRepository();

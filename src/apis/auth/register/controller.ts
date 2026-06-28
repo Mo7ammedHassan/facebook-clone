@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response, RequestHandler } from "express";
-import { registerUser } from "./register.service";
+import { registerUser } from "./service";
 import AppError from "../../../utils/app-error";
 import cookieOptions from "../../../options/cookie-options";
-import { IResponseUser, IRequestUser } from "./register.types";
+import { IResponseUser, IRequestUser } from "./types";
 import { catchError } from "../../../utils/catch-error";
 
  const registerController: RequestHandler<
@@ -12,8 +12,6 @@ import { catchError } from "../../../utils/catch-error";
 > = catchError(async (req: Request, res: Response, next: NextFunction) => {
 
     const { email, password, name, confirmPassword, dateOfBirthStr } = req.body;
-
-    
 
     if (!email || !password || !name || !dateOfBirthStr || !confirmPassword) {
       throw new AppError("Missing required fields", 400);

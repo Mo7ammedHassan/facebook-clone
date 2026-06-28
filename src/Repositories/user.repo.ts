@@ -1,4 +1,5 @@
-import prisma from "../../../config/prisma-client.config";
+import prisma from "../config/prisma-client.config";
+
 class UserRepository {
   async findByEmail(email: string) {
     return await prisma.user.findUnique({

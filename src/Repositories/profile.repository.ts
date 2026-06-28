@@ -1,8 +1,8 @@
-import prisma from "../../../config/prisma-client.config";
+import prisma from "../config/prisma-client.config";
 
 export class ProfileRepository {
   async createProfileForUser(userId: number, dateOfBirth: Date, bio?: string) {
-    return await prisma.profile.create({
+    return await prisma.profile.create( {
       data: {
         userId: userId,
         dateOfBirth: dateOfBirth,

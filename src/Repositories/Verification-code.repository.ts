@@ -1,4 +1,4 @@
-import prisma from "../../../config/prisma-client.config";
+import prisma from "../config/prisma-client.config";
 
 class VerificationCodeRepository {
   async createCode(

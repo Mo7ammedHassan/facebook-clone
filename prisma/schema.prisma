@@ -273,12 +273,11 @@ model User {
   updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
 
-  // العلاقات
   posts                 Post[]
   imageId               Int?               @unique
   image                 Image?             @relation(fields: [imageId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   groups                MembersOfGroup[]
-  profile               Profile? // علاقة ون تو ون صحيحة (المفتاح الأجنبي في الـ Profile)
+  profile               Profile? 
   reacts                React[]
   comments              Comment[]
   friends               Friends[]          @relation("UserFriends")
@@ -303,7 +302,6 @@ model Profile {
   work        String?
   updatedAt   DateTime @updatedAt
 
-  // العلاقة مع اليوزر
   userId Int  @unique
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -317,7 +315,6 @@ model Image {
   description String?
   createdAt   DateTime @default(now())
 
-  // العلاقات
   user           User?
   coverGroup     Group?
   post           PostImage[]
@@ -441,11 +438,10 @@ model SavedPosts {
 
 model LoginSession {
   id           Int      @id @default(autoincrement())
-  token        String
-  refreshToken String
+  refreshToken String   @unique
   createdAt    DateTime @default(now())
-  expiredAt    DateTime
-
+  expireAt    DateTime
+  revokedAt    DateTime?
   userId Int
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
