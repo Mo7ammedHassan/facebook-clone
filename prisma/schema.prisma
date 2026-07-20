@@ -267,7 +267,6 @@ model User {
   password        String
   isBlocked       Boolean   @default(false)
   role            String    @default("user")
-  isPrivate       Boolean   @default(false)
   isEmailVerified Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -277,7 +276,7 @@ model User {
   imageId               Int?               @unique
   image                 Image?             @relation(fields: [imageId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   groups                MembersOfGroup[]
-  profile               Profile? 
+  profile               Profile?
   reacts                React[]
   comments              Comment[]
   friends               Friends[]          @relation("UserFriends")
@@ -292,6 +291,7 @@ model User {
 
 model Profile {
   id          Int      @id @default(autoincrement())
+  isPrivate   Boolean  @default(false)
   bio         String?
   gender      String?
   dateOfBirth DateTime
@@ -323,7 +323,7 @@ model Image {
 
 model Post {
   id           Int       @id @default(autoincrement())
-  content      String
+  content      String?
   loveCount    Int       @default(0)
   hahaCount    Int       @default(0)
   eggCount     Int       @default(0)
@@ -437,13 +437,13 @@ model SavedPosts {
 }
 
 model LoginSession {
-  id           Int      @id @default(autoincrement())
-  refreshToken String   @unique
-  createdAt    DateTime @default(now())
-  expireAt    DateTime
+  id           Int       @id @default(autoincrement())
+  refreshToken String    @unique
+  createdAt    DateTime  @default(now())
+  expireAt     DateTime
   revokedAt    DateTime?
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model GroupRequests {

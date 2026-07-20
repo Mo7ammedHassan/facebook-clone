@@ -30,7 +30,7 @@ export const registerSchema = z.object({
 
   dateOfBirth: z
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, { error: "الصيغة يجب أن تكون YYYY-MM-DD" })
+    .regex(/^\d{4}-\d{2}-\d{2}$/, { error: "Invalid date format. Please use YYYY-MM-DD" })
     .refine(
       (dobString) => {
         const dob = new Date(dobString);

@@ -3,8 +3,8 @@ import AppError from "../utils/app-error";
 import jwt from "jsonwebtoken";
 
 import environment from "../config/environment";
-import UserRepository from "../apis/auth/Repositories/user.repo";
 import Role from "../enums/role.enum";
+import UserRepository from "../Repositories/user.repository";
 
 
 interface JwtPayload {

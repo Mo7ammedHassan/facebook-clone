@@ -2,13 +2,12 @@ import bcrypt from "bcrypt";
 import AppError from "../../../utils/app-error";
 import createAuthTokens from "../../../utils/auth-tokens";
 import hashRefreshToken from "../../../utils/hash-refresh-token";
-import UserRepository from "../../../Repositories/user.repo";
-import LoginSessionRepository from "../../../Repositories/login-session.Repo";
+import UserRepository from "../../../Repositories/user.repository";
+import LoginSessionRepository from "../../../Repositories/login-session.repository";
 
 const userRepo = new UserRepository();
 const loginSessionRepo = new LoginSessionRepository();
-const loginUser = async (email: string, password: string) => {
-  
+const loginService = async (email: string, password: string) => {
   const user = await userRepo.findByEmail(email);
 
   if (!user) {
@@ -34,4 +33,4 @@ const loginUser = async (email: string, password: string) => {
   return { token, refreshToken, expireAt, user };
 };
 
-export default loginUser;
+export default loginService;

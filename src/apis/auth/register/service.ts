@@ -4,8 +4,8 @@ import AppError from "../../../utils/app-error";
 import environment from "../../../config/environment";
 import createAuthTokens from "../../../utils/auth-tokens";
 import { createPublicId } from "../../../utils/create-public-id";
-import UserRepository from "../../../Repositories/user.repo";
-import LoginSessionRepository from "../../../Repositories/login-session.Repo";
+import UserRepository from "../../../Repositories/user.repository";
+import LoginSessionRepository from "../../../Repositories/login-session.repository";
 import ProfileRepository from "../../../Repositories/profile.repository";
 
 const userRepo = new UserRepository();
@@ -30,7 +30,7 @@ export const registerUser = async (
     throw new AppError("Invalid date format. Please use YYYY-MM-DD", 400);
   }
 
-  if(password !== confirmPassword) {
+  if (password !== confirmPassword) {
     throw new AppError("Passwords do not match", 400);
   }
 
@@ -49,7 +49,6 @@ export const registerUser = async (
     publicId,
   });
 
-
   const userId = newUser.id;
 
   let { token, refreshToken, expireAt } = await createAuthTokens(userId);
@@ -63,7 +62,6 @@ export const registerUser = async (
     expireAt,
     userId,
   });
-
 
   // 5. ميزة الفيسبوك: إنشاء البروفايل تلقائياً لليوزر الجديد
   await profileRepo.createProfileForUser(userId, dateOfBirth);

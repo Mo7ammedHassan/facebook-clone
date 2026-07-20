@@ -11,6 +11,7 @@ import { catchError } from "../../../utils/catch-error";
   IRequestUser
 > = catchError(async (req: Request, res: Response, next: NextFunction) => {
 
+    // console.log(req.body);
     const { email, password, name, confirmPassword, dateOfBirthStr } = req.body;
 
     if (!email || !password || !name || !dateOfBirthStr || !confirmPassword) {

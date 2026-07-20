@@ -14,8 +14,9 @@ const validate =
   (req: Request, res: Response, next: NextFunction) => {
     try {
       const parsed = schema.parse(req.body);
-
+      
       // replace body with validated & sanitized data
+      console.log(parsed);
       req.body = parsed;
 
       next();
