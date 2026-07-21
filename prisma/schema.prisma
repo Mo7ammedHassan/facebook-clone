@@ -92,11 +92,11 @@ model Post {
 
   // العلاقة مع الجروب
   groupId      Int?
-  group        Group? @relation(fields: [groupId], references: [id], onDelete: SetNull)
-  status       String @default("Approved")
+  group        Group?    @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  status       String    @default("Approved")
   approvedById Int?
-  approvedBy   User?  @relation("PostApprover", fields: [approvedById], references: [id], onDelete: SetNull)
-  approvedAt DateTime?
+  approvedBy   User?     @relation("PostApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt   DateTime?
 
   // مشاركة البوست (Share Post)
   parentPostId  Int?
@@ -111,29 +111,28 @@ model Post {
 
   // لبوستات جروب معين مرتبة بالأحدث
   @@index([groupId, status, createdAt(sort: Desc)])
-
   // لبوستات المستخدم معين مرتبة بالأحدث
   @@index([userId, createdAt(sort: Desc)])
-
   // للأدمن
   @@index([groupId, status])
 }
 
 model Group {
-  id           Int                 @id @default(autoincrement())
-  name         String
-  description  String?
-  rules        String?
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
-  isOpen       Boolean             @default(true) // اي حد يقدر يدخل بدون تقديم طلب 
-  isPrivate    Boolean             @default(false) // اي حد يقدر يشوف البوستات 
+  id                 Int                 @id @default(autoincrement())
+  name               String
+  description        String?
+  rules              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  canAnyOneWritePost Boolean             @default(true)
+  isOpen             Boolean             @default(true) // اي حد يقدر يدخل بدون تقديم طلب 
+  isPrivate          Boolean             @default(false) // اي حد يقدر يشوف البوستات 
   // العلاقات
-  coverId      Int?                @unique
-  cover        Image?              @relation(fields: [coverId], references: [id], onDelete: SetNull)
-  posts        Post[]
-  members      MembersOfGroup[]
-  joinRequests GroupJoinRequests[]
+  coverId            Int?                @unique
+  cover              Image?              @relation(fields: [coverId], references: [id], onDelete: SetNull)
+  posts              Post[]
+  members            MembersOfGroup[]
+  joinRequests       GroupJoinRequests[]
 }
 
 model MembersOfGroup {
@@ -173,6 +172,7 @@ model Comment {
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   imageId Int?
   image   Image? @relation(fields: [imageId], references: [id], onDelete: SetNull)
+
   @@index([postId, createdAt])
 }
 
@@ -196,8 +196,9 @@ model SavedPosts {
   post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
   userId Int
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@index([userId, createdAt(sort: Desc)])
+
   @@unique([userId, postId])
+  @@index([userId, createdAt(sort: Desc)])
 }
 
 model LoginSession {
