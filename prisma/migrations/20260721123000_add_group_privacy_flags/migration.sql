@@ -1,0 +1,21 @@
+BEGIN TRY
+
+BEGIN TRAN;
+
+-- AlterTable
+ALTER TABLE [dbo].[Group] ADD
+    [isOpen] BIT NOT NULL CONSTRAINT [Group_isOpen_df] DEFAULT 1,
+    [isPrivate] BIT NOT NULL CONSTRAINT [Group_isPrivate_df] DEFAULT 0;
+
+COMMIT TRAN;
+
+END TRY
+BEGIN CATCH
+
+IF @@TRANCOUNT > 0
+BEGIN
+    ROLLBACK TRAN;
+END;
+THROW
+
+END CATCH

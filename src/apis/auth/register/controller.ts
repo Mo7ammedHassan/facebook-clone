@@ -12,12 +12,12 @@ import { catchError } from "../../../utils/catch-error";
 > = catchError(async (req: Request, res: Response, next: NextFunction) => {
 
     // console.log(req.body);
-    const { email, password, name, confirmPassword, dateOfBirthStr } = req.body;
+    const { email, password, name, confirmPassword, dbo } = req.body;
 
-    if (!email || !password || !name || !dateOfBirthStr || !confirmPassword) {
+    if (!email || !password || !name || !dbo || !confirmPassword) {
       throw new AppError("Missing required fields", 400);
     }
-
+    const dateOfBirthStr = dbo;
     const result = await registerUser(
       email,
       password,

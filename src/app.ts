@@ -5,6 +5,7 @@ import authRouter from "./apis/auth/auth.router";
 import environment from "./config/environment";
 import postRouter from "./apis/posts/post.route";
 import multer from "multer";
+import groupRouter from "./apis/group/router";
 
 const app = express();
 
@@ -18,6 +19,8 @@ app.use(cookieParser());
 app.use("/auth", authRouter);
 
 app.use("/post", postRouter);
+
+app.use("/group",groupRouter);
 
 app.use(globalErrorHandler);
 

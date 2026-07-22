@@ -1,18 +1,23 @@
 import { Request, Response, NextFunction } from "express";
 import AppError from "../utils/app-error";
 // استدعاء الـ Prisma للوصول لـ أخطاء الـ Classes الرسمية في إصدار 7
-import { Prisma } from "../../generated/prisma/client"; 
+import { Prisma } from "../../generated/prisma/client";
 
 /* =========================
    Prisma Error Handlers
    ========================= */
 
-const handlePrismaDuplicateError = (err: Prisma.PrismaClientKnownRequestError): AppError => {
+const handlePrismaDuplicateError = (
+  err: Prisma.PrismaClientKnownRequestError,
+): AppError => {
   const fields = Array.isArray(err.meta?.target)
     ? err.meta.target.join(", ")
     : "field";
 
-  return new AppError(`Duplicate field value: ${fields}. Please use another value.`, 400);
+  return new AppError(
+    `Duplicate field value: ${fields}. Please use another value.`,
+    400,
+  );
 };
 
 const handlePrismaNotFoundError = (): AppError => {
@@ -20,25 +25,39 @@ const handlePrismaNotFoundError = (): AppError => {
 };
 
 const handlePrismaForeignKeyError = (): AppError => {
-  return new AppError("Invalid reference to a related record (Foreign key constraint failed).", 400);
+  return new AppError(
+    "Invalid reference to a related record (Foreign key constraint failed).",
+    400,
+  );
 };
 
-const handlePrismaValidationError = (err: Prisma.PrismaClientValidationError): AppError => {
+const handlePrismaValidationError = (
+  err: Prisma.PrismaClientValidationError,
+): AppError => {
   // بنبسط المسج لليوزر في الـ Prod عشان ميسربش الـ Schema internals
-  return new AppError("Invalid input data type or missing required fields based on database schema.", 400);
+  return new AppError(
+    "Invalid input data type or missing required fields based on database schema.",
+    400,
+  );
 };
 
 const handlePrismaInitializationError = (): AppError => {
-  return new AppError("Database connection failed. Please try again later.", 500);
+  return new AppError(
+    "Database connection failed. Please try again later.",
+    500,
+  );
 };
 
 /* =========================
    Web & Express Error Handlers
    ========================= */
 
-const handleJWTError = (): AppError => new AppError("Invalid token. Please log in again.", 401);
-const handleJWTExpiredError = (): AppError => new AppError("Your token has expired! Please log in again.", 401);
-const handleExpressJSONError = (): AppError => new AppError("Invalid JSON format in request body.", 400);
+const handleJWTError = (): AppError =>
+  new AppError("Invalid token. Please log in again.", 401);
+const handleJWTExpiredError = (): AppError =>
+  new AppError("Your token has expired! Please log in again.", 401);
+const handleExpressJSONError = (): AppError =>
+  new AppError("Invalid JSON format in request body.", 400);
 
 /* =========================
    Response Helpers
@@ -120,7 +139,10 @@ export const globalErrorHandler = (
         error = handlePrismaForeignKeyError();
         break;
       default:
-        error = new AppError(`Database operation failed (Code: ${err.code})`, 400);
+        error = new AppError(
+          `Database operation failed (Code: ${err.code})`,
+          400,
+        );
     }
   }
 

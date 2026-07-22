@@ -1,14 +1,22 @@
+import e from "express";
 import prisma from "../config/prisma-client.config";
 
-enum PostType {
+export enum PostType {
   normal = "normal",
   shared = "shared",
 }
+
+export enum PostStatus {
+  approved = "approved",
+  pending = "pending",
+  rejected = "rejected",
+}
 // أنواع البيانات المدخلة للـ Repository (DTO / Types)
- interface CreatePostDTO {
+interface CreatePostDTO {
   content?: string;
   userId: number;
   groupId?: number | null;
+  status?: PostStatus;
   images?: {
     publicId: string;
     fileName: string;
@@ -24,6 +32,7 @@ export class PostRepository {
       content: data.content,
       userId: data.userId,
       groupId: data.groupId || null,
+      status: data.status || PostStatus.approved,
     };
 
     // 2. الفحص الذكي: لو الـ Controller بعت صور، ضيف علاقة الإنشاء المتداخلة
