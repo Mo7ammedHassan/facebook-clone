@@ -16,7 +16,6 @@ const validate =
       const parsed = schema.parse(req.body);
       
       // replace body with validated & sanitized data
-      console.log(parsed);
       req.body = parsed;
 
       next();

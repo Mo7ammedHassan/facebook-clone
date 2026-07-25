@@ -9,21 +9,27 @@ const groupRepo = new GroupRepository();
 const createPostService = async (data: CreatePostDTO) => {
   let post;
   let member = await groupRepo.getMember(data.groupId, data.userId);
-  if (member) {
-    // if you are a member
+  const group = await groupRepo.getGroup(data.groupId);
+  if (group?.canAnyOneWritePost === false) {
 
-    if (member.role === "owner" || member.role === "admin")
-      post = await postRepo.create(data);
-
-    else if (member.role === "member") {
-      data.status = PostStatus.pending;
-      post = await postRepo.create(data);
+    if (member) {
+      // if you are a member
+      if (member.role === "owner" || member.role === "admin")
+        post = await postRepo.create(data);
+      else if (member.role === "member") {
+        data.status = PostStatus.pending;
+        post = await postRepo.create(data);
+      }
+    } else {
+      if (!member) {
+        throw new Error("You are not a member of this group");
+      }
+      return post;
     }
-  } else {
-    if (!member) {
-      throw new Error("You are not a member of this group"); // مش اي حد يقدر ينشر
-    }
-    return post;
   }
+  else {
+    post = await postRepo.create(data);
+  }
+  return post;
 };
 export default createPostService;

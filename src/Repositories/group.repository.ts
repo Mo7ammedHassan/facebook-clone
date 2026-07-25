@@ -51,10 +51,16 @@ class GroupRepository {
         role: role.owner,
       },
     };
-
     return await prisma.group.create({
       data: groupData,
       include: { members: true, cover: true },
+    });
+  }
+
+  async getGroup(groupId: number) {
+    return await prisma.group.findUnique({
+      where: { id: groupId },
+      // include: { members: true, cover: true },
     });
   }
 
