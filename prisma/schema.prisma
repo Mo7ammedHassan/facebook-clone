@@ -31,11 +31,12 @@ model User {
   friendedBy            Friends[]           @relation("UserFriendsOf")
   savedPosts            SavedPosts[]
   sessions              LoginSession[]
-  requestsJoinToGroup   GroupJoinRequests[]
+  requestsJoinToGroup   GroupJoinRequest[]
   notificationsReceived Notifications[]     @relation("NotificationRecipient")
   notificationsSent     Notifications[]     @relation("NotificationActor")
   verificationCode      VerificationCode[]
   postsApproved         Post[]              @relation("PostApprover")
+  actor                 GroupJoinRequest[] @relation("GroupJoinRequestActor")
 }
 
 model Profile {
@@ -132,7 +133,7 @@ model Group {
   cover              Image?              @relation(fields: [coverId], references: [id], onDelete: SetNull)
   posts              Post[]
   members            MembersOfGroup[]
-  joinRequests       GroupJoinRequests[]
+  joinRequests       GroupJoinRequest[]
 }
 
 model MembersOfGroup {
@@ -213,16 +214,21 @@ model LoginSession {
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model GroupJoinRequests {
+model GroupJoinRequest {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  actedAt   DateTime? 
+  actedById Int?
+  actor     User?     @relation("GroupJoinRequestActor", fields: [actedById], references: [id], onDelete: SetNull)
   groupId   Int
   group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
   userId    Int
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    String   @default("pending")
 
   @@unique([groupId, userId])
+  @@index([groupId, createdAt(sort: Desc)])
+	@@map("GroupJoinRequests")
 }
 
 model Notifications {

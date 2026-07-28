@@ -4,21 +4,22 @@ import { catchError } from "../../../../utils/catch-error";
 import createPostService from "./service";
 import { randomBytes } from "node:crypto";
 const createPostController = catchError(
-  async (req: Request<{}, {}, CreatePostDTO>, res: Response) => {
+  async (req: Request<any, any, CreatePostDTO>, res: Response) => {
     const userId = req.user.id;
-    const { content, groupId } = req.body;
-    if(!groupId){
-        res.status(400).json({
-            success: false,
-            message: "Group id is required",
-        });
+    const groupId = +req.params.groupId;
+    const { content } = req.body;
+    if (!groupId) {
+      res.status(400).json({
+        success: false,
+        message: "Group id is required",
+      });
     }
 
-    if(!content){
-        res.status(400).json({
-            success: false,
-            message: "Content is required",
-        });
+    if (!content) {
+      res.status(400).json({
+        success: false,
+        message: "Content is required",
+      });
     }
     const files = req.files as any;
     let images;

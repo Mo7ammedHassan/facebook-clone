@@ -1,11 +1,8 @@
+import { number } from "zod";
 import { Prisma } from "../../generated/prisma/browser";
 import prisma from "../config/prisma-client.config";
-
-enum role {
-  owner = "owner",
-  admin = "admin",
-  member = "member",
-}
+import GroupRole from "../enums/group-role";
+import GroupStatusRequest from "../enums/group-status-requests";
 
 interface ICreateGroup {
   name: string;
@@ -13,8 +10,8 @@ interface ICreateGroup {
   optional?: {
     description?: string;
     rules?: string;
-    isOpen?:boolean;
-    isPrivate?:boolean;
+    isOpen?: boolean;
+    isPrivate?: boolean;
   };
   cover?: {
     publicId: string;
@@ -24,7 +21,6 @@ interface ICreateGroup {
 }
 
 class GroupRepository {
-
   // group table
   async createGroup(data: ICreateGroup) {
     const groupData: Prisma.GroupCreateInput = {
@@ -32,7 +28,7 @@ class GroupRepository {
       description: data.optional?.description,
       rules: data.optional?.rules,
       isOpen: data.optional?.isOpen,
-      isPrivate: data.optional?.isPrivate
+      isPrivate: data.optional?.isPrivate,
     };
 
     if (data.cover) {
@@ -48,7 +44,7 @@ class GroupRepository {
     groupData.members = {
       create: {
         userId: data.ownerId,
-        role: role.owner,
+        role: GroupRole.owner,
       },
     };
     return await prisma.group.create({
@@ -64,12 +60,8 @@ class GroupRepository {
     });
   }
 
-  // group request 
-
-
-  // accepted members
-  async addMember(groupId: number, userId: number) {
-    return await prisma.membersOfGroup.create({
+  async requestJoinToGroup(groupId: number, userId: number) {
+    return await prisma.groupJoinRequest.create({
       data: {
         groupId,
         userId,
@@ -77,12 +69,128 @@ class GroupRepository {
     });
   }
 
+  async getRequestJoinById(requestId: number) {
+    const request = await prisma.groupJoinRequest.findUnique({
+      where: { id: requestId },
+      select: {
+        groupId: true,
+        userId: true,
+        status: true,
+        actor: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+    return request;
+  }
+
+  async acceptGroupRequest(
+    requestId: number,
+    groupId: number,
+    userId: number,
+    actorId: number,
+  ) {
+    return await prisma.$transaction([
+      prisma.groupJoinRequest.update({
+        where: { id: requestId },
+        data: {
+          status: GroupStatusRequest.accepted,
+          actedById: actorId,
+          actedAt: new Date(),
+        },
+      }),
+      prisma.membersOfGroup.create({
+        data: {
+          groupId,
+          userId,
+          role: GroupRole.member,
+        },
+      }),
+    ]);
+  }
+
+  async rejectGroupRequest(requestId: number, actorId: number) {
+    return await prisma.groupJoinRequest.update({
+      where: { id: requestId },
+      data: {
+        status: GroupStatusRequest.rejected,
+        actedById: actorId,
+        actedAt: new Date(),
+      },
+    });
+  }
+
+  async getJoinRequestByGroupIdAndUserId(groupId: number, userId: number) {
+    return await prisma.groupJoinRequest.findFirst({
+      where: {
+        groupId,
+        userId: userId,
+      },
+    });
+  }
+
   async thisUserIsMember(groupId: number, userId: number) {
     return await prisma.membersOfGroup.count({
       where: {
-        groupId:groupId,
-        userId:userId,
+        groupId: groupId,
+        userId: userId,
       },
+    });
+  }
+
+  async addUser(groupId: number, userId: number) {
+    return await prisma.membersOfGroup.create({
+      data: {
+        groupId,
+        userId,
+        role: GroupRole.member,
+      },
+    });
+  }
+  async listRequestsJoinToGroup(groupId: number) {
+    const requests = await prisma.groupJoinRequest.findMany({
+      where: {
+        groupId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        actor: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: {
+              select: {
+                filePath: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return requests.map((req) => {
+      const isPending = req.status === GroupStatusRequest.pending;
+      return {
+        requestId: req.id,
+        requesterId: req.user.id,
+        requesterName: req.user.name,
+        status: req.status,
+        createdAt: req.createdAt,
+        avatar: req.user.image?.filePath || null,
+        actorId: isPending ? null : req.actor?.id,
+        actorName: isPending ? null : req.actor?.name,
+        actedAt: isPending ? null : req.actedAt,
+      };
     });
   }
 
@@ -92,7 +200,10 @@ class GroupRepository {
         groupId,
         userId,
       },
-    })
+      select: {
+        role: true,
+      },
+    });
   }
   async removeMember(groupId: number, userId: number) {
     return await prisma.membersOfGroup.deleteMany({
@@ -103,7 +214,7 @@ class GroupRepository {
     });
   }
 
-  async updateMemberRole (groupId: number, userId: number, role: string) {
+  async updateMemberRole(groupId: number, userId: number, role: string) {
     return await prisma.membersOfGroup.updateMany({
       where: {
         groupId,
@@ -114,7 +225,5 @@ class GroupRepository {
       },
     });
   }
-
-  // requested post in group
 }
 export default GroupRepository;
