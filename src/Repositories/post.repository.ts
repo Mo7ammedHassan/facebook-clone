@@ -1,4 +1,3 @@
-import e from "express";
 import prisma from "../config/prisma-client.config";
 
 export enum PostType {
@@ -80,6 +79,73 @@ export class PostRepository {
       },
     });
   }
+
+  async feed(data: {
+    currentUserId: number;
+    myGroupIds: number[];
+    myFriendIds: number[];
+    limit: number;
+    cursor?: number;
+  }) {
+    return await prisma.post.findMany({
+      take: data.limit,
+
+      // --- 2. لو الفرونت إند باعت cursor، ابدأ يجيب من بعده ---
+      ...(data.cursor
+        ? {
+            skip: 1, // بتتخطى البوست اللي هو الـ cursor نفسه عشان ما يتكررش
+           cursor: {
+              id: data.cursor,
+            },
+          }
+        : {}),
+      where: {
+        deletedAt: null,
+        OR: [
+          {
+            userId: data.currentUserId,
+          },
+          {
+            groupId: {
+              in: data.myGroupIds,
+            },
+          },
+          {
+            userId: {
+              in: data.myFriendIds,
+            },
+          },
+        ],
+      },
+
+      orderBy: {
+        createdAt: "desc",
+      },
+
+      include: {
+        author: true,
+        images: {
+          include: {
+            image: true,
+          },
+        },
+        group: true,
+        parentPost: {
+          include: {
+            author: true,
+            images: {
+              include: {
+                image: true,
+              },
+            },
+            group: true,
+          },
+        },
+      },
+    });
+    
+  }
+  
 }
 
 export default PostRepository;

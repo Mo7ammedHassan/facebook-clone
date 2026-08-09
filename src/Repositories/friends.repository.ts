@@ -109,7 +109,6 @@ class FriendRepository {
     });
   }
 
-
   async acceptRequest(userId: number, friendId: number) {
     return await prisma.friends.updateMany({
       where: {
@@ -145,7 +144,7 @@ class FriendRepository {
       },
     });
   }
-   
+
   async deleteFriendship(userId: number, friendId: number) {
     return await prisma.friends.deleteMany({
       where: {
@@ -155,6 +154,18 @@ class FriendRepository {
         ],
       },
     });
+  }
+
+  async getMyFriendsIds(userId: number): Promise<number[]> {
+    const friends = await prisma.friends.findMany({
+      where: {
+        userId,
+      },
+      select: {
+        friendId: true,
+      },
+    })
+    return friends.map(friend => friend.friendId)
   }
 }
 

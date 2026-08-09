@@ -11,7 +11,7 @@ const createPostService = async (data: CreatePostDTO) => {
   let member = await groupRepo.getMember(data.groupId, data.userId);
   const group = await groupRepo.getGroup(data.groupId);
   if (group?.canAnyOneWritePost === false) {
-
+    
     if (member) {
       // if you are a member
       if (member.role === "owner" || member.role === "admin")

@@ -123,13 +123,20 @@ class GroupRepository {
     });
   }
 
-  async getJoinRequestByGroupIdAndUserId(groupId: number, userId: number) {
-    return await prisma.groupJoinRequest.findFirst({
+  async cancelGroupRequest(requestId: number, actorId: number) {
+    
+  }
+
+  async getMyGroupIds(userId: number): Promise<number[]> {
+    const groups = await prisma.membersOfGroup.findMany({
       where: {
-        groupId,
-        userId: userId,
+        userId,
+      },
+      select: {
+        groupId: true,
       },
     });
+    return groups.map(group => group.groupId);
   }
 
   async thisUserIsMember(groupId: number, userId: number) {
