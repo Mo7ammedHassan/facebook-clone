@@ -4,7 +4,7 @@ import UserRepository from "../../../Repositories/user.repository";
 const friendRepo = new FriendRepository();
 const userRepo = new UserRepository();
 const addFriendService = async (senderId: number, receiverId: number) => {
-  const receiver = userRepo.findById(receiverId);
+  const receiver = await userRepo.findById(receiverId);
   
   if (!receiver) throw new Error("Receiver not found");
 

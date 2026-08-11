@@ -1,38 +1,67 @@
-import prisma from "../config/prisma-client.config";
 
-export enum friendShipStatus {
-  pending = "pending",
-  accepted = "accepted",
-  rejected = "rejected",
-}
+import prisma from "../config/prisma-client.config";
+import friendShipStatus from "../enums/friend-ship-status";
+
 class FriendRepository {
-  async sendRequest(userId: number, friendId: number) {
+  // Send and cancel friend requests
+  async sendRequest(currentUserId: number, friendId: number) {
     return await prisma.friends.create({
       data: {
-        userId,
+        userId: currentUserId,
         friendId,
       },
     });
   }
 
-  // 1. الطلبات اللي جيتلي (أنا جالي طلب من مين؟)
-  async getRequestsSentToMe(myUserId: number) {
+  async cancelRequest(currentUserId: number, targetUserId: number) {
+    return await prisma.friends.deleteMany({
+      where: {
+        status: friendShipStatus.pending,
+        userId: currentUserId,
+        friendId: targetUserId,
+      },
+    });
+  }
+
+  // --------------------------------
+
+  // Get sent and received friend requests
+  async getRequestsSentToMe(currentUserId: number, limit: number, cursor?: number) {
     const requests = await prisma.friends.findMany({
-      where: { friendId: myUserId, status: "pending" },
+      where: {
+        friendId: currentUserId,
+        status: "pending",
+      },
       select: {
         id: true,
         createdAt: true,
         user: {
-          // الراسل
           select: {
             id: true,
             name: true,
-            image: { select: { filePath: true } },
+            image: {
+              select: {
+                filePath: true,
+              },
+            },
           },
         },
       },
-    });
+      orderBy: {
+        createdAt: "desc",
+      },
+      ...(cursor
+        ? {
+            skip: 1, // بتتخطى البوست اللي هو الـ cursor نفسه عشان ما يتكررش
+            cursor: {
+              id: cursor,
+            },
+          }
+        : {}),
+      take: limit,
 
+    });
+  
     return requests.map((req) => ({
       requestId: req.id,
       createdAt: req.createdAt,
@@ -44,19 +73,24 @@ class FriendRepository {
     }));
   }
 
-  // 2. الطلبات اللي أنا بعتها (أنا بعت طلب لمين؟)
-  async getRequestsSentByMe(myUserId: number) {
+  async getRequestsSentByMe(currentUserId: number) {
     const requests = await prisma.friends.findMany({
-      where: { userId: myUserId, status: "pending" },
+      where: {
+        userId: currentUserId,
+        status: "pending",
+      },
       select: {
         id: true,
         createdAt: true,
         friend: {
-          // المستقبل
           select: {
             id: true,
             name: true,
-            image: { select: { filePath: true } },
+            image: {
+              select: {
+                filePath: true,
+              },
+            },
           },
         },
       },
@@ -66,7 +100,6 @@ class FriendRepository {
       requestId: req.id,
       createdAt: req.createdAt,
       receiver: {
-        // غيرنا اسم friend لـ receiver
         id: req.friend.id,
         name: req.friend.name,
         avatar: req.friend.image?.filePath || null,
@@ -74,41 +107,9 @@ class FriendRepository {
     }));
   }
 
-  async getAllFriends(myUserId: number) {
-    const friends = await prisma.friends.findMany({
-      where: {
-        status: friendShipStatus.accepted,
-        OR: [{ userId: myUserId }, { friendId: myUserId }],
-      },
-      select: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            image: { select: { filePath: true } },
-          },
-        },
-        friend: {
-          select: {
-            id: true,
-            name: true,
-            image: { select: { filePath: true } },
-          },
-        },
-      },
-    });
+  // --------------------------------
 
-    // هنا بنحدد مين الصديق ومين أنا
-    return friends.map((f) => {
-      const friendData = f.user.id === myUserId ? f.friend : f.user;
-      return {
-        id: friendData.id,
-        name: friendData.name,
-        avatar: friendData.image?.filePath || null,
-      };
-    });
-  }
-
+  // Accept and reject friend requests
   async acceptRequest(userId: number, friendId: number) {
     return await prisma.friends.updateMany({
       where: {
@@ -134,38 +135,114 @@ class FriendRepository {
     });
   }
 
-  async getFriendshipStatus(myUserId: number, otherUserId: number) {
+  // --------------------------------
+
+  // Get friendship status
+  async getFriendshipStatus(
+    currentUserId: number,
+    otherUserId: number
+  ) {
     return await prisma.friends.findFirst({
       where: {
         OR: [
-          { userId: myUserId, friendId: otherUserId },
-          { userId: otherUserId, friendId: myUserId },
+          {
+            userId: currentUserId,
+            friendId: otherUserId,
+          },
+          {
+            userId: otherUserId,
+            friendId: currentUserId,
+          },
         ],
       },
     });
   }
 
+  // --------------------------------
+
+  // Get all friends
+  async getAllFriends(currentUserId: number) {
+    const friends = await prisma.friends.findMany({
+      where: {
+        status: friendShipStatus.accepted,
+        OR: [
+          { userId: currentUserId },
+          { friendId: currentUserId },
+        ],
+      },
+      select: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: {
+              select: {
+                filePath: true,
+              },
+            },
+          },
+        },
+        friend: {
+          select: {
+            id: true,
+            name: true,
+            image: {
+              select: {
+                filePath: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return friends.map((f) => {
+      const friendData =
+        f.user.id === currentUserId ? f.friend : f.user;
+
+      return {
+        id: friendData.id,
+        name: friendData.name,
+        avatar: friendData.image?.filePath || null,
+      };
+    });
+  }
+
+  // --------------------------------
+
+  // Delete friendship
   async deleteFriendship(userId: number, friendId: number) {
     return await prisma.friends.deleteMany({
       where: {
         OR: [
-          { userId: userId, friendId: friendId },
-          { userId: friendId, friendId: userId },
+          {
+            userId: userId,
+            friendId: friendId,
+          },
+          {
+            userId: friendId,
+            friendId: userId,
+          },
         ],
       },
     });
   }
 
+  // --------------------------------
+
+  // Get friend IDs
   async getMyFriendsIds(userId: number): Promise<number[]> {
     const friends = await prisma.friends.findMany({
       where: {
         userId,
+        status: friendShipStatus.accepted,
       },
       select: {
         friendId: true,
       },
-    })
-    return friends.map(friend => friend.friendId)
+    });
+
+    return friends.map((friend) => friend.friendId);
   }
 }
 

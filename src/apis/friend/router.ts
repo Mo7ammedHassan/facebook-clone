@@ -3,6 +3,7 @@ import addFriendController from "./send-request/controller";
 import { authenticate } from "../../middlewares/authentication";
 import listFriendSentToMeRequestsController from "./list-friend-sent-to-me-requests/controller";
 import acceptRequestController from "./accept-request/controller";
+import cancelRequestController from "./cancel-request/controller";
 
 const friendRouter = Router();
 
@@ -12,6 +13,9 @@ friendRouter.post("/request", addFriendController);
 
 friendRouter.get("/list-friends-requests", listFriendSentToMeRequestsController);
 
-friendRouter.put("/accept-request/:id", acceptRequestController);
+friendRouter.patch("/accept-request/:id", acceptRequestController);
+
+friendRouter.patch("/cancel-request/:id", cancelRequestController);
+
 
 export default friendRouter;

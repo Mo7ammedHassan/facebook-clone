@@ -1,5 +1,5 @@
+import friendShipStatus from "../../../enums/friend-ship-status";
 import FriendRepository, {
-  friendShipStatus,
 } from "../../../Repositories/friends.repository";
 import AppError from "../../../utils/app-error";
 
