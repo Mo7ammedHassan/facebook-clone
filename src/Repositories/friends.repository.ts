@@ -218,6 +218,7 @@ class FriendRepository {
   async deleteFriendship(userId: number, friendId: number) {
     return await prisma.friends.deleteMany({
       where: {
+        status: friendShipStatus.accepted,
         OR: [
           {
             userId: userId,
