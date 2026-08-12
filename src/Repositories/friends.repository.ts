@@ -1,4 +1,3 @@
-
 import prisma from "../config/prisma-client.config";
 import friendShipStatus from "../enums/friend-ship-status";
 
@@ -26,7 +25,11 @@ class FriendRepository {
   // --------------------------------
 
   // Get sent and received friend requests
-  async getRequestsSentToMe(currentUserId: number, limit: number, cursor?: number) {
+  async getRequestsSentToMe(
+    currentUserId: number,
+    limit: number,
+    cursor?: number,
+  ) {
     const requests = await prisma.friends.findMany({
       where: {
         friendId: currentUserId,
@@ -59,9 +62,8 @@ class FriendRepository {
           }
         : {}),
       take: limit,
-
     });
-  
+
     return requests.map((req) => ({
       requestId: req.id,
       createdAt: req.createdAt,
@@ -126,8 +128,9 @@ class FriendRepository {
   async rejectRequest(userId: number, friendId: number) {
     return await prisma.friends.updateMany({
       where: {
-        userId,
-        friendId,
+        userId: friendId,
+        friendId: userId,
+        status: friendShipStatus.pending,
       },
       data: {
         status: friendShipStatus.rejected,
@@ -138,10 +141,7 @@ class FriendRepository {
   // --------------------------------
 
   // Get friendship status
-  async getFriendshipStatus(
-    currentUserId: number,
-    otherUserId: number
-  ) {
+  async getFriendshipStatus(currentUserId: number, otherUserId: number) {
     return await prisma.friends.findFirst({
       where: {
         OR: [
@@ -158,6 +158,14 @@ class FriendRepository {
     });
   }
 
+  async getUniqueRequestSentToMe(currentUserId: number, targetUserId: number) {
+    return await prisma.friends.findFirst({
+      where: {
+        userId: targetUserId,
+        friendId: currentUserId,
+      },
+    });
+  }
   // --------------------------------
 
   // Get all friends
@@ -165,10 +173,7 @@ class FriendRepository {
     const friends = await prisma.friends.findMany({
       where: {
         status: friendShipStatus.accepted,
-        OR: [
-          { userId: currentUserId },
-          { friendId: currentUserId },
-        ],
+        OR: [{ userId: currentUserId }, { friendId: currentUserId }],
       },
       select: {
         user: {
@@ -197,8 +202,7 @@ class FriendRepository {
     });
 
     return friends.map((f) => {
-      const friendData =
-        f.user.id === currentUserId ? f.friend : f.user;
+      const friendData = f.user.id === currentUserId ? f.friend : f.user;
 
       return {
         id: friendData.id,

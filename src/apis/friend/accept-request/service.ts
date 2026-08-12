@@ -1,6 +1,5 @@
 import friendShipStatus from "../../../enums/friend-ship-status";
-import FriendRepository, {
-} from "../../../Repositories/friends.repository";
+import FriendRepository from "../../../Repositories/friends.repository";
 import AppError from "../../../utils/app-error";
 
 const friendRepo = new FriendRepository();
@@ -11,7 +10,7 @@ const acceptRequestService = async (userId: number, requesterId: number) => {
   if (!friendship) {
     throw new AppError("Friend request not found", 404);
   }
-  
+
   if (friendship.friendId !== userId) {
     throw new AppError("You cannot accept a friend request you sent", 403);
   }
@@ -23,7 +22,6 @@ const acceptRequestService = async (userId: number, requesterId: number) => {
   if (friendship.status !== friendShipStatus.pending) {
     throw new AppError("No pending friend request found", 400);
   }
-
 
   // The requester is stored in `userId`; the logged-in user is `friendId`.
   const result = await friendRepo.acceptRequest(requesterId, userId);
