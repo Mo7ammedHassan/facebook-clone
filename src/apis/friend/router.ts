@@ -1,29 +1,39 @@
 import { Router } from "express";
 import sendRequestController from "./send-request/controller";
 import { authenticate } from "../../middlewares/authentication";
-import receivedRequestsController from "./list-friend-sent-to-me-requests/controller";
+import receivedRequestsController from "./received-requests/controller";
 import acceptRequestController from "./accept-request/controller";
 import cancelRequestController from "./cancel-request/controller";
 import rejectRequestController from "./reject-request/controller";
 import deleteFriendController from "./delete-friendship/controller";
 import listFriendsController from "./list-friends/controller";
+import sentRequestsController from "./sent-requests/controller";
+import getFriendshipStatusController from "./get-friendship-status/controller";
 
 const friendRouter = Router();
 
 friendRouter.use(authenticate);
 
-friendRouter.post("/request/send/:id", sendRequestController);
+// --- Friend Requests ---
 
-friendRouter.get("/request/received", receivedRequestsController);
+friendRouter.post("/requests/send/:id", sendRequestController);
 
-friendRouter.patch("/request/accept/:id", acceptRequestController);
+friendRouter.get("/requests/received", receivedRequestsController);
 
-friendRouter.patch("/request/cancel/:id", cancelRequestController);
+friendRouter.get("/requests/sent", sentRequestsController);
 
-friendRouter.patch("/request/reject/:id", rejectRequestController);
+friendRouter.patch("/requests/accept/:id", acceptRequestController);
 
-friendRouter.patch("/friends/delete/:id", deleteFriendController);
+friendRouter.delete("/requests/cancel/:id", cancelRequestController);
 
-friendRouter.get("/friends/list", listFriendsController);
+friendRouter.patch("/requests/reject/:id", rejectRequestController);
+
+// --- Friendship & Relationships ---
+
+friendRouter.delete("/:id", deleteFriendController);
+
+friendRouter.get("/status/:id", getFriendshipStatusController);
+
+friendRouter.get("/list", listFriendsController);
 
 export default friendRouter;

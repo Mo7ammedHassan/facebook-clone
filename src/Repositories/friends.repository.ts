@@ -75,7 +75,11 @@ class FriendRepository {
     }));
   }
 
-  async getRequestsSentByMe(currentUserId: number) {
+  async getRequestsSentByMe(
+    currentUserId: number,
+    limit: number,
+    cursor?: number,
+  ) {
     const requests = await prisma.friends.findMany({
       where: {
         userId: currentUserId,
@@ -96,6 +100,18 @@ class FriendRepository {
           },
         },
       },
+      orderBy: {
+        createdAt: "desc",
+      },
+      ...(cursor
+        ? {
+            skip: 1,
+            cursor: {
+              id: cursor,
+            },
+          }
+        : {}),
+      take: limit,
     });
 
     return requests.map((req) => ({
@@ -155,6 +171,9 @@ class FriendRepository {
           },
         ],
       },
+      select: {
+        status: true,
+      },
     });
   }
 
@@ -207,7 +226,8 @@ class FriendRepository {
             cursor: {
               id: cursor,
             },
-          }: {}),
+          }
+        : {}),
     });
 
     return friends.map((f) => {
