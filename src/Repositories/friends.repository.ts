@@ -169,7 +169,7 @@ class FriendRepository {
   // --------------------------------
 
   // Get all friends
-  async getAllFriends(currentUserId: number) {
+  async getAllFriends(currentUserId: number, limit: number, cursor?: number) {
     const friends = await prisma.friends.findMany({
       where: {
         status: friendShipStatus.accepted,
@@ -199,6 +199,15 @@ class FriendRepository {
           },
         },
       },
+      take: limit,
+
+      ...(cursor
+        ? {
+            skip: 1,
+            cursor: {
+              id: cursor,
+            },
+          }: {}),
     });
 
     return friends.map((f) => {

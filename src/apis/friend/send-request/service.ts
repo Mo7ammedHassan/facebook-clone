@@ -3,7 +3,7 @@ import UserRepository from "../../../Repositories/user.repository";
 
 const friendRepo = new FriendRepository();
 const userRepo = new UserRepository();
-const addFriendService = async (senderId: number, receiverId: number) => {
+const sendRequestService = async (senderId: number, receiverId: number) => {
   const receiver = await userRepo.findById(receiverId);
   
   if (!receiver) throw new Error("Receiver not found");
@@ -11,4 +11,4 @@ const addFriendService = async (senderId: number, receiverId: number) => {
   await friendRepo.sendRequest(senderId, receiverId);
 };
 
-export default addFriendService;
+export default sendRequestService;
