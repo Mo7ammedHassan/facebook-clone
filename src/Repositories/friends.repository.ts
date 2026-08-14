@@ -27,7 +27,7 @@ class FriendRepository {
     senderId: number,
     receiverId: number,
   ) {
-   await prisma.friends.update({
+    await prisma.friends.update({
       where: { id: relationId },
       data: {
         userId: senderId,
@@ -185,9 +185,6 @@ class FriendRepository {
           },
         ],
       },
-      select: {
-        status: true,
-      },
     });
   }
 
@@ -299,15 +296,25 @@ class FriendRepository {
   async getMyFriendsIds(userId: number): Promise<number[]> {
     const friends = await prisma.friends.findMany({
       where: {
-        userId,
         status: friendShipStatus.accepted,
+        OR: [
+          {
+            userId: userId,
+          },
+          {
+            friendId: userId,
+          },
+        ],
       },
       select: {
+        userId: true,
         friendId: true,
       },
     });
 
-    return friends.map((friend) => friend.friendId);
+    return friends.map((friend) =>
+      friend.userId === userId ? friend.friendId : friend.userId,
+  );
   }
 }
 

@@ -6,14 +6,17 @@ import AppError from "../../../utils/app-error";
 const friendRepo = new FriendRepository();
 const userRepo = new UserRepository();
 const sendRequestService = async (senderId: number, receiverId: number) => {
+  if (senderId === receiverId) {
+    throw new AppError("You cannot send a friend request to yourself", 400);
+  }
   const [targetUser, existingRelation] = await Promise.all([
     userRepo.findById(receiverId),
-    friendRepo.existingRelation(senderId, receiverId),
+    friendRepo.getFriendshipStatus(senderId, receiverId),
   ]);
   if (!targetUser) {
     throw new AppError("User not found", 404);
   }
-  // مشكله بنت وسخه لما حاولت ابعت طلب مرتين اداني dublicate key بدل ما يضرب من ال service ضرب من ال db
+
   if (existingRelation) {
     if (existingRelation.status === friendShipStatus.pending) {
       throw new AppError(
@@ -34,7 +37,11 @@ const sendRequestService = async (senderId: number, receiverId: number) => {
       existingRelation.status === friendShipStatus.rejected &&
       existingRelation.friendId === senderId
     ) {
-      await friendRepo.updateRequestRolesAndStatus( existingRelation.id,senderId, receiverId);
+      await friendRepo.updateRequestRolesAndStatus(
+        existingRelation.id,
+        senderId,
+        receiverId,
+      );
       return;
     }
     throw new AppError("Cannot send friend request", 400);
