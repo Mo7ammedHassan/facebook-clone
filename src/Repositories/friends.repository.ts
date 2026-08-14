@@ -22,6 +22,20 @@ class FriendRepository {
     });
   }
 
+  async updateRequestRolesAndStatus(
+    relationId: number,
+    senderId: number,
+    receiverId: number,
+  ) {
+   await prisma.friends.update({
+      where: { id: relationId },
+      data: {
+        userId: senderId,
+        friendId: receiverId,
+        status: friendShipStatus.pending,
+      },
+    });
+  }
   // --------------------------------
 
   // Get sent and received friend requests
@@ -182,6 +196,23 @@ class FriendRepository {
       where: {
         userId: targetUserId,
         friendId: currentUserId,
+      },
+    });
+  }
+
+  async existingRelation(userId: number, targetUserId: number) {
+    return await prisma.friends.findFirst({
+      where: {
+        OR: [
+          {
+            userId: userId,
+            friendId: targetUserId,
+          },
+          {
+            userId: targetUserId,
+            friendId: userId,
+          },
+        ],
       },
     });
   }

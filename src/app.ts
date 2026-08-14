@@ -14,7 +14,6 @@ app.use(express.json());
 
 // app.use(express.urlencoded({ extended: true }));
 
-// app.use(multer);
 app.use(cookieParser());
 
 app.use("/auth", authRouter);
@@ -24,6 +23,7 @@ app.use("/post", postRouter);
 app.use("/group",groupRouter);
 
 app.use("/friends",friendRouter);
+
 app.use(globalErrorHandler);
 
 app.listen(environment.PORT, () => {
