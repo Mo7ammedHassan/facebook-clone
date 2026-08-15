@@ -65,6 +65,7 @@ class UserRepository {
     passwordHash: string;
     name: string;
     publicId: string;
+    username: string;
   }) {
     return await prisma.user.create({
       data: {
@@ -72,6 +73,7 @@ class UserRepository {
         password: data.passwordHash,
         name: data.name,
         publicId: data.publicId,
+        username: data.username,
       },
     });
   }

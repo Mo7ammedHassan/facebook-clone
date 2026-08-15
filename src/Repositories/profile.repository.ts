@@ -16,6 +16,7 @@ export class ProfileRepository {
       where: { userId: userId },
     });
   }
+  
 }
 
 export default ProfileRepository;

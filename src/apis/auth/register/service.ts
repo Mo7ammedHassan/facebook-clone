@@ -7,6 +7,7 @@ import { createPublicId } from "../../../utils/create-public-id";
 import UserRepository from "../../../Repositories/user.repository";
 import LoginSessionRepository from "../../../Repositories/login-session.repository";
 import ProfileRepository from "../../../Repositories/profile.repository";
+import createSlugFromName from "../../../utils/create-slug-from-name";
 
 const userRepo = new UserRepository();
 const loginSessionRepo = new LoginSessionRepository();
@@ -41,16 +42,17 @@ export const registerUser = async (
   while (await userRepo.publicIdExists(publicId)) {
     publicId = createPublicId();
   }
-
+  const username = `${createSlugFromName(name)}_${publicId}`;
   const newUser = await userRepo.createUser({
     email,
     passwordHash,
     name,
     publicId,
+    username,
   });
 
   const userId = newUser.id;
-
+  
   let { token, refreshToken, expireAt } = await createAuthTokens(userId);
   const hashedRefreshToken = crypto
     .createHash("sha256")
