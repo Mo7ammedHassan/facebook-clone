@@ -7,6 +7,7 @@ import postRouter from "./apis/posts/post.route";
 import multer from "multer";
 import groupRouter from "./apis/group/router";
 import friendRouter from "./apis/friend/router";
+import userRouter from "./apis/user/user.router";
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use("/group",groupRouter);
 
 app.use("/friends",friendRouter);
 
+app.use("/user",userRouter);
 app.use(globalErrorHandler);
 
 app.listen(environment.PORT, () => {

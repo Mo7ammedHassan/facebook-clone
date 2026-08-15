@@ -42,7 +42,7 @@ export const registerUser = async (
   while (await userRepo.publicIdExists(publicId)) {
     publicId = createPublicId();
   }
-  const username = `${createSlugFromName(name)}_${publicId}`;
+  const username = `${createSlugFromName(name)}-${publicId}`;
   const newUser = await userRepo.createUser({
     email,
     passwordHash,
