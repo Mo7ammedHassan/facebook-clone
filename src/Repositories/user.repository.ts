@@ -13,6 +13,19 @@ class UserRepository {
     });
   }
 
+  async findByPublicId(publicId: string) {
+    return await prisma.user.findUnique({
+      where: { publicId },
+    });
+  }
+
+  async findByUsername(username: string) {
+    return await prisma.user.findUnique({
+      where: { username },
+      include: { profile: true, image: { select: { filePath: true } } },
+    });
+  }
+
   async updateById(
     id: number,
     data: {
@@ -52,13 +65,13 @@ class UserRepository {
     });
     return count > 0;
   }
-  
+
   async publicIdExists(publicId: string): Promise<boolean> {
     const count = await prisma.user.count({
       where: { publicId },
     });
     return count > 0;
-  } 
+  }
 
   async createUser(data: {
     email: string;
