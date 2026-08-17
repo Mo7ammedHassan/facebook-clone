@@ -24,7 +24,7 @@ async updateProfile(
 ) {
   return await prisma.profile.update({
     where: { userId },
-    data:{...data},
+    data,
   });
 }
 }

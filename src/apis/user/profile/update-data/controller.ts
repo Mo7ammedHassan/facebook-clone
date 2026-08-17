@@ -10,7 +10,7 @@ const updateProfileController = catchError(
     res: Response,
   ) => {
     const userId = +req.user.id;
-    const data = req.body;
+    const {...data} = req.body;
     // if(typeof data.isPrivate === "boolean"){
     //     throw new AppError("isPrivate must be a boolean (true or false)",400);
     // }
