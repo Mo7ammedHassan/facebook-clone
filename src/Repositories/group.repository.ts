@@ -87,6 +87,22 @@ class GroupRepository {
     return request;
   }
 
+  async thisUserRequestToJoin(groupId: number, userId: number) {
+    return await prisma.groupJoinRequest.findFirst({
+      where: {
+        groupId,
+        userId,
+      },
+    });
+  }
+
+  async listPosts(groupId: number) {
+    return await prisma.post.findMany({
+      where: { groupId: groupId },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
   async acceptGroupRequest(
     requestId: number,
     groupId: number,
@@ -123,8 +139,13 @@ class GroupRepository {
     });
   }
 
-  async cancelGroupRequest(requestId: number, actorId: number) {
-    
+  async cancelGroupRequest(requestId: number) {
+
+    return await prisma.groupJoinRequest.delete({
+      where: {
+        id: requestId,
+      },
+    });
   }
 
   async getMyGroupIds(userId: number): Promise<number[]> {
@@ -136,11 +157,11 @@ class GroupRepository {
         groupId: true,
       },
     });
-    return groups.map(group => group.groupId);
+    return groups.map((group) => group.groupId);
   }
 
   async thisUserIsMember(groupId: number, userId: number) {
-    return await prisma.membersOfGroup.count({
+    return await prisma.membersOfGroup.findFirst({
       where: {
         groupId: groupId,
         userId: userId,
@@ -157,6 +178,7 @@ class GroupRepository {
       },
     });
   }
+
   async listRequestsJoinToGroup(groupId: number) {
     const requests = await prisma.groupJoinRequest.findMany({
       where: {
@@ -212,6 +234,7 @@ class GroupRepository {
       },
     });
   }
+
   async removeMember(groupId: number, userId: number) {
     return await prisma.membersOfGroup.deleteMany({
       where: {

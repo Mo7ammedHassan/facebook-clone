@@ -8,12 +8,17 @@ import multer from "multer";
 import groupRouter from "./apis/group/router";
 import friendRouter from "./apis/friend/router";
 import userRouter from "./apis/user/user.router";
-
+import cors from "cors";
 const app = express();
 
 app.use(express.json());
 
 // app.use(express.urlencoded({ extended: true }));
+
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));
 
 app.use(cookieParser());
 

@@ -6,6 +6,8 @@ import createPostController from "./posts/create-post/controller";
 import requestJoinToGroupController from "./group-management/request-join-to group/controller";
 import listRequestsJoinToGroupController from "./group-management/list-requests-join-to-group/controller";
 import updateGroupRequestStatusController from "./group-management/update-group-request-status/controller";
+import listPostsController from "./posts/list-posts/controller";
+import cancelGroupRequestController from "./group-management/cancel-group-request/controller";
 
 const groupRouter = Router();
 
@@ -19,8 +21,10 @@ groupRouter.post(
   createPostController,
 );
 
+groupRouter.get("/:groupId/posts/list", listPostsController);
 groupRouter.get("/:groupId/request-join", requestJoinToGroupController);
 
+groupRouter.delete("/:groupId/cancel-request", cancelGroupRequestController); //not test
 groupRouter.get(
   "/:groupId/list-requests-join",
   listRequestsJoinToGroupController,

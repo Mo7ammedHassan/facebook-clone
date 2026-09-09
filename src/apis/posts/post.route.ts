@@ -3,11 +3,14 @@ import createPostController from "./create-post/controller";
 import { authenticate } from "../../middlewares/authentication";
 import upload from "../../middlewares/storage-multer";
 import feedController from "./feed/controller";
+import createPostWithoutImageController from "./create post without image/controller";
 
 
 const postRouter= Router();
 
 postRouter.use(authenticate);
+
+postRouter.post("/create-without-image", createPostWithoutImageController);
 
 postRouter.post("/create",upload.array("images",30), createPostController);
 

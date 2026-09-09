@@ -7,10 +7,7 @@ const requestJoinToGroupService = async (groupId: number, userId: number) => {
   const group = await groupRepo.getGroup(groupId);
   if (!group) throw new AppError("Group not found", 404);
   if (!group.isOpen) {
-    const checkMember = await groupRepo.getJoinRequestByGroupIdAndUserId(
-      groupId,
-      userId,
-    );
+    const checkMember = await groupRepo.thisUserRequestToJoin(groupId, userId);
 
     if (checkMember) {
       if (checkMember.status === "accepted")
