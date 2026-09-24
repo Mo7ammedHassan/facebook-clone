@@ -3,6 +3,7 @@ import { Prisma } from "../../generated/prisma/browser";
 import prisma from "../config/prisma-client.config";
 import GroupRole from "../enums/group-role";
 import GroupStatusRequest from "../enums/group-status-requests";
+import postStatus from "../enums/post-status";
 
 interface ICreateGroup {
   name: string;
@@ -56,7 +57,45 @@ class GroupRepository {
   async getGroup(groupId: number) {
     return await prisma.group.findUnique({
       where: { id: groupId },
-      // include: { members: true, cover: true },
+    });
+  }
+  async getGroupDetails(groupId: number) {
+    return await prisma.group.findUnique({
+      where: { id: groupId },
+      include: {
+        members: {
+          where: { role: { in: [GroupRole.owner, GroupRole.admin] } },
+          select: {
+            role: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: {
+                  select: {
+                    filePath: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+            posts: {
+              where: { status: postStatus.approved },
+            },
+          },
+        },
+        cover: {
+          select: {
+            publicId: true,
+            fileName: true,
+            filePath: true,
+          },
+        },
+      },
     });
   }
 
@@ -96,9 +135,13 @@ class GroupRepository {
     });
   }
 
-  async listPosts(groupId: number) {
+  async listPosts(groupId: number, status?: postStatus) {
     return await prisma.post.findMany({
-      where: { groupId: groupId },
+      where: {
+        groupId: groupId,
+        status: status ? status : postStatus.approved,
+      },
+
       orderBy: { createdAt: "desc" },
     });
   }
@@ -140,7 +183,6 @@ class GroupRepository {
   }
 
   async cancelGroupRequest(requestId: number) {
-
     return await prisma.groupJoinRequest.delete({
       where: {
         id: requestId,
@@ -244,7 +286,109 @@ class GroupRepository {
     });
   }
 
-  async updateMemberRole(groupId: number, userId: number, role: string) {
+  async getMemberDetails(groupId: number, userId: number) {
+    return prisma.membersOfGroup.findMany({
+      where: {
+        groupId,
+        userId,
+      },
+
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            joinAt: true,
+            image: {
+              select: {
+                filePath: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+  async getMembers(groupId: number, limit: number, cursor?: number) {
+    return prisma.membersOfGroup.findMany({
+      where: {
+        groupId,
+      },
+      orderBy: [{ joinedAt: "desc" }, { id: "desc" }],
+      take: limit,
+      ...(cursor !== undefined
+        ? {
+            skip: 1, 
+            cursor: {
+              id: cursor,
+            },
+          }
+        : {}),
+      include: {
+        user: {
+          select: {
+            
+            id: true,
+            name: true,
+            image: {
+              select: {
+                filePath: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+  //  group: {
+  //           select: {
+  //             posts: {
+  //               select: {
+  //                 id: true,
+  //                 status: true,
+  //                 createdAt: true,
+  //                 content: true,
+  //                 updatedAt: true,
+  //                 images: {
+  //                   select: {
+  //                     image: {
+  //                       select: {
+  //                         filePath: true,
+  //                       },
+  //                     },
+  //                   },
+  //                 },
+  //                 parentPost: {
+  //                   select: {
+  //                     id: true,
+  //                     content: true,
+  //                     images: {
+  //                       select: {
+  //                         image: {
+  //                           select: {
+  //                             filePath: true,
+  //                           },
+  //                         },
+  //                       },
+  //                     },
+  //                     author: {
+  //                       select: {
+  //                         id: true,
+  //                         name: true,
+  //                         image: {
+  //                           select: {
+  //                             filePath: true,
+  //                           },
+  //                         },
+  //                       },
+  //                     },
+  //                   },
+  //                 },
+  //               },
+  //             },
+  //           },
+  //         },
+  async updateMemberRole(groupId: number, userId: number, role: GroupRole) {
     return await prisma.membersOfGroup.updateMany({
       where: {
         groupId,

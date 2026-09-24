@@ -8,6 +8,10 @@ import listRequestsJoinToGroupController from "./group-management/list-requests-
 import updateGroupRequestStatusController from "./group-management/update-group-request-status/controller";
 import listPostsController from "./posts/list-posts/controller";
 import cancelGroupRequestController from "./group-management/cancel-group-request/controller";
+import checkUserJoinedToGroupController from "./group-management/check-user-joined-to-group/controller";
+import groupDetailsController from "./group-management/group-details/controller";
+import discoverMembersController from "./group-management/discover-members/controller";
+import updateRoleController from "./group-management/update-role/controller";
 
 const groupRouter = Router();
 
@@ -21,10 +25,22 @@ groupRouter.post(
   createPostController,
 );
 
-groupRouter.get("/:groupId/posts/list", listPostsController);
-groupRouter.get("/:groupId/request-join", requestJoinToGroupController);
+groupRouter.get("/:groupId/group-details", groupDetailsController);
 
-groupRouter.delete("/:groupId/cancel-request", cancelGroupRequestController); //not test
+groupRouter.get("/:groupId/discover-members", discoverMembersController);
+
+groupRouter.patch("/:groupId/update-role/:targetUserid", updateRoleController);
+
+groupRouter.get("/:groupId/posts/list", listPostsController);
+//list post using status(not test)
+groupRouter.post("/:groupId/request-join", requestJoinToGroupController);
+
+groupRouter.get(
+  "/:groupId/check-user-joined-to-group",
+  checkUserJoinedToGroupController,
+);
+
+groupRouter.delete("/:groupId/cancel-request", cancelGroupRequestController); //(not test)
 groupRouter.get(
   "/:groupId/list-requests-join",
   listRequestsJoinToGroupController,

@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser";
 import authRouter from "./apis/auth/auth.router";
 import environment from "./config/environment";
 import postRouter from "./apis/posts/post.route";
-import multer from "multer";
 import groupRouter from "./apis/group/router";
 import friendRouter from "./apis/friend/router";
 import userRouter from "./apis/user/user.router";
