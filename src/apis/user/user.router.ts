@@ -12,9 +12,13 @@ userRouter.use(authenticate);
 
 //-------Profile-------
 
-userRouter.patch("/profile/me/update-data",updateProfileController);
+userRouter.patch(
+  "/profile/me/update-data",
+  validate(updateProfileSchema),
+  updateProfileController,
+);
 
 userRouter.get("/profile/me", getMyProfileController);
 
-userRouter.get("/profile/:username",validate(updateProfileSchema), getProfileByUsernameController);
+userRouter.get("/profile/:username", getProfileByUsernameController);
 export default userRouter;

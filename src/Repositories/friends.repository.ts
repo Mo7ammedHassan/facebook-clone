@@ -168,6 +168,36 @@ class FriendRepository {
     });
   }
 
+  async areAcceptedFriends(
+    currentUserId: number,
+    otherUserId: number,
+  ): Promise<boolean> {
+    if (currentUserId === otherUserId) {
+      return true;
+    }
+
+    const friendship = await prisma.friends.findFirst({
+      where: {
+        status: friendShipStatus.accepted,
+        OR: [
+          {
+            userId: currentUserId,
+            friendId: otherUserId,
+          },
+          {
+            userId: otherUserId,
+            friendId: currentUserId,
+          },
+        ],
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return friendship !== null;
+  }
+
   // --------------------------------
 
   // Get friendship status
@@ -314,7 +344,7 @@ class FriendRepository {
 
     return friends.map((friend) =>
       friend.userId === userId ? friend.friendId : friend.userId,
-  );
+    );
   }
 }
 

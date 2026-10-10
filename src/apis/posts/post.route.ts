@@ -4,16 +4,19 @@ import { authenticate } from "../../middlewares/authentication";
 import upload from "../../middlewares/storage-multer";
 import feedController from "./feed/controller";
 import createPostWithoutImageController from "./create post without image/controller";
+import getPostByIdController from "./get-post-by-Id/controller";
 
-
-const postRouter= Router();
+const postRouter = Router();
 
 postRouter.use(authenticate);
 
 postRouter.post("/create-without-image", createPostWithoutImageController);
 
-postRouter.post("/create",upload.array("images",30), createPostController);
+postRouter.post("/create", upload.array("images", 30), createPostController);
 
-postRouter.get("/feed",feedController);
+postRouter.get("/feed", feedController);
 
-export default postRouter
+postRouter.get("/:postId", getPostByIdController);
+
+
+export default postRouter;

@@ -6,7 +6,6 @@ import environment from "../config/environment";
 import Role from "../enums/role.enum";
 import UserRepository from "../Repositories/user.repository";
 
-
 interface JwtPayload {
   id: number;
   iat: number;
@@ -16,7 +15,11 @@ interface JwtPayload {
 // عمل الـ Instance برة عشان الأداء وسرعة الـ Request
 const userRepo = new UserRepository();
 
-export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
+export const authenticate = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     let token = "";
 
@@ -37,7 +40,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     // 2. عمل Verify للتوكن بالـ Access Secret القياسي
     const decoded = jwt.verify(
       token,
-      environment.JWT_TOKEN_SECRET_KEY, 
+      environment.JWT_TOKEN_SECRET_KEY,
     ) as JwtPayload;
 
     const id = +decoded.id;
@@ -52,10 +55,10 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     // 3. تخزين الداتا جوه الـ req (سيب الـ Role كابيتال أو زي ما هي في الـ DB)
     req.user = {
       id: id,
-      role: currentUser.role as Role, 
+      role: currentUser.role as Role,
       email: currentUser.email,
     };
-    
+
     next();
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {

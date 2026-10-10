@@ -145,7 +145,71 @@ export class PostRepository {
     });
     
   }
+
+  async postById(data: { postId: number }) {
+    return await prisma.post.findUnique({
+      where: {
+        id: data.postId,
+      },
+      include: {
+        author: true,
+        images: {
+          include: {
+            image: true,
+          },
+        },
+        group: true,
+        parentPost: {
+          include: {
+            author: true,
+            images: {
+              include: {
+                image: true,
+              },
+            },
+            group: true,
+          },
+        },
+      },
+    });
+  }
   
+  async findPostAccessData(postId: number) {
+  return await prisma.post.findUnique({
+    where: {
+      id: postId,
+    },
+    select: {
+      id: true,
+      userId: true,
+      isPrivate: true,
+      author: {
+        select: {
+          id: true,
+          isPrivate: true,
+        },
+      },
+      group: {
+        select: {
+          id: true,
+          isPrivate: true,
+        },
+      },
+      parentPostId: true,
+    },
+  });
+}
+
+async softDelete(postId: number) {
+  return await prisma.post.update({
+    where: {
+      id: postId,
+    },
+    data: {
+      deletedAt: new Date(),
+    },
+  });
+}
 }
 
 export default PostRepository;

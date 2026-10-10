@@ -6,13 +6,12 @@ import validate from "../../middlewares/validate-body.middleware";
 import { registerSchema } from "./register/validation";
 import logout from "./logout/controller";
 
-const authRouter= express.Router();
+const authRouter = express.Router();
 
-authRouter.post("/register",registerController)
+authRouter.post("/register", registerController);
 
-authRouter.post("/login", validate(loginSchema),loginController)
+authRouter.post("/login", validate(loginSchema), loginController);
 
-authRouter.post("/login",logout)
+authRouter.post("/logout", logout);
 
-
-export default authRouter
+export default authRouter;

@@ -135,6 +135,18 @@ class GroupRepository {
     });
   }
 
+  async leave(groupId: number, userId: number) {
+    return await prisma.membersOfGroup.updateMany({
+      where: {
+        groupId,
+        userId,
+      },
+      data: {
+        leavedAt: new Date(),
+      },
+    });
+  }
+  
   async listPosts(groupId: number, status?: postStatus) {
     return await prisma.post.findMany({
       where: {
@@ -207,6 +219,7 @@ class GroupRepository {
       where: {
         groupId: groupId,
         userId: userId,
+        leavedAt: null,
       },
     });
   }
@@ -270,6 +283,7 @@ class GroupRepository {
       where: {
         groupId,
         userId,
+        leavedAt: null,
       },
       select: {
         role: true,
@@ -291,6 +305,7 @@ class GroupRepository {
       where: {
         groupId,
         userId,
+        
       },
 
       include: {
@@ -313,12 +328,13 @@ class GroupRepository {
     return prisma.membersOfGroup.findMany({
       where: {
         groupId,
+        leavedAt: null,
       },
       orderBy: [{ joinedAt: "desc" }, { id: "desc" }],
       take: limit,
       ...(cursor !== undefined
         ? {
-            skip: 1, 
+            skip: 1,
             cursor: {
               id: cursor,
             },
@@ -327,7 +343,6 @@ class GroupRepository {
       include: {
         user: {
           select: {
-            
             id: true,
             name: true,
             image: {

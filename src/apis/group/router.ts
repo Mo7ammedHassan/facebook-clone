@@ -12,6 +12,7 @@ import checkUserJoinedToGroupController from "./group-management/check-user-join
 import groupDetailsController from "./group-management/group-details/controller";
 import discoverMembersController from "./group-management/discover-members/controller";
 import updateRoleController from "./group-management/update-role/controller";
+import leaveGroupController from "./group-management/leave-group/controller";
 
 const groupRouter = Router();
 
@@ -31,6 +32,7 @@ groupRouter.get("/:groupId/discover-members", discoverMembersController);
 
 groupRouter.patch("/:groupId/update-role/:targetUserid", updateRoleController);
 
+groupRouter.delete("/:groupId/leave", leaveGroupController);
 groupRouter.get("/:groupId/posts/list", listPostsController);
 //list post using status(not test)
 groupRouter.post("/:groupId/request-join", requestJoinToGroupController);

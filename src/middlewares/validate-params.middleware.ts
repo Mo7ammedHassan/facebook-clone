@@ -10,8 +10,7 @@ import AppError from "../utils/app-error";
  * - Global Error Handler
  */
 const validate =
-  (schema: ZodSchema) =>
-  (req: Request, res: Response, next: NextFunction) => {
+  (schema: ZodSchema) => (req: Request, res: Response, next: NextFunction) => {
     try {
       const parsed = schema.parse(req.params);
 
@@ -21,9 +20,7 @@ const validate =
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const message = error.issues
-          .map(err => err.message)
-          .join(", ");
+        const message = error.issues.map((err) => err.message).join(", ");
 
         return next(new AppError(message, 400));
       }
