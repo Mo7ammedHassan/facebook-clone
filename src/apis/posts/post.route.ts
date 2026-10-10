@@ -5,6 +5,7 @@ import upload from "../../middlewares/storage-multer";
 import feedController from "./feed/controller";
 import createPostWithoutImageController from "./create post without image/controller";
 import getPostByIdController from "./get-post-by-Id/controller";
+import softDeletePostController from "./soft-delete/controller";
 
 const postRouter = Router();
 
@@ -17,6 +18,10 @@ postRouter.post("/create", upload.array("images", 30), createPostController);
 postRouter.get("/feed", feedController);
 
 postRouter.get("/:postId", getPostByIdController);
+
+postRouter.delete("/:postId", softDeletePostController);
+
+
 
 
 export default postRouter;
